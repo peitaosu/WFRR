@@ -1,0 +1,1 @@
+# Windows Registry Redirection
