@@ -1,0 +1,15 @@
+# Visual Studio Code Configuration Files
+.vscode/
+
+# Visual Studio Configuration Files
+.vs/
+
+# Build
+bin/
+obj/
+
+# Binaries
+*.dll
+*.lib
+*.pdb
+*.exe
