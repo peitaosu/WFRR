@@ -45,6 +45,11 @@ namespace RegHook {
 
             _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
 
+            var openRegKeyHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExW"),
+                new RegOpenKeyExW_Delegate(RegOpenKeyExW_Hook),
+                this);
+            
             var queryRegValueHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
                 new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
@@ -54,10 +59,12 @@ namespace RegHook {
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueExW"),
                 new RegSetValueExW_Delegate(RegSetValueExW_Hook),
                 this);
-
+            
+            openRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
 
@@ -82,11 +89,53 @@ namespace RegHook {
                 }
             } catch { }
 
+            openRegKeyHook.Dispose();
             queryRegValueHook.Dispose();
             setRegValueHook.Dispose();
 
             EasyHook.LocalHook.Release ();
         }
+
+        #region RegOpenKeyExW Hook
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr RegOpenKeyExW_Delegate (
+            UIntPtr hKey,
+            string subKey,
+            int ulOptions,
+            int samDesired,
+            UIntPtr hkResult);
+
+        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyExW")]
+        public static extern IntPtr RegOpenKeyExW (
+            UIntPtr hKey,
+            string subKey,
+            int ulOptions,
+            int samDesired,
+            UIntPtr hkResult);
+
+        IntPtr RegOpenKeyExW_Hook (
+            UIntPtr hKey,
+            string subKey,
+            int ulOptions,
+            int samDesired,
+            UIntPtr hkResult) {
+
+            IntPtr result = RegOpenKeyExW (hKey, subKey, ulOptions, samDesired, hkResult);
+            try {
+                lock (this._messageQueue) {
+                    if (this._messageQueue.Count < 1000) {
+
+                        this._messageQueue.Enqueue (
+                            string.Format ("[{0}:{1}]: Open {2} {3} return code: {4}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), hKey, subKey, result));
+                    }
+                }
+            } catch { }
+
+            return result;
+        }
+
+        #endregion
 
         #region RegSetValueExW Hook
 
