@@ -47,12 +47,12 @@ namespace RegHook {
 
             var queryRegKeyHook = EasyHook.LocalHook.Create (
                 EasyHook.LocalHook.GetProcAddress ("advapi32.dll", "RegQueryValueExW"),
-                new RegQueryValueEx_Delegate (RegQueryValueEx_Hook),
+                new RegQueryValueExW_Delegate (RegQueryValueExW_Hook),
                 this);
 
             queryRegKeyHook.ThreadACL.SetExclusiveACL (new Int32[] { 0 });
 
-            _server.ReportMessage (EasyHook.RemoteHooking.GetCurrentProcessId (), "RegQueryValueEx hook installed");
+            _server.ReportMessage (EasyHook.RemoteHooking.GetCurrentProcessId (), "RegQueryValueExW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -80,10 +80,10 @@ namespace RegHook {
             EasyHook.LocalHook.Release ();
         }
 
-        #region RegQueryValueEx Hook
+        #region RegQueryValueExW Hook
 
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr RegQueryValueEx_Delegate (
+        delegate IntPtr RegQueryValueExW_Delegate (
             UIntPtr hKey,
             string lpValueName,
             int lpReserved,
@@ -91,8 +91,8 @@ namespace RegHook {
             IntPtr lpData,
             ref int lpcbData);
 
-        [DllImport ("advapi32.dll", CharSet = CharSet.Unicode)]
-        public static extern IntPtr RegQueryValueEx (
+        [DllImport ("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "RegQueryValueExW")]
+        public static extern IntPtr RegQueryValueExW (
             UIntPtr hKey,
             string lpValueName,
             int lpReserved,
@@ -101,7 +101,7 @@ namespace RegHook {
             ref int lpcbData
         );
 
-        IntPtr RegQueryValueEx_Hook (
+        IntPtr RegQueryValueExW_Hook (
             UIntPtr hKey,
             string lpValueName,
             int lpReserved,
@@ -109,17 +109,17 @@ namespace RegHook {
             IntPtr lpData,
             ref int lpcbData) {
 
-            IntPtr result = RegQueryValueEx (hKey, lpValueName, lpReserved, type, lpData, ref lpcbData);
+            IntPtr result = RegQueryValueExW (hKey, lpValueName, lpReserved, type, lpData, ref lpcbData);
             IntPtr ptr = Marshal.AllocHGlobal (lpcbData);
-            RegQueryValueEx (hKey, lpValueName, lpReserved, type, ptr, ref lpcbData);
+            RegQueryValueExW (hKey, lpValueName, lpReserved, type, ptr, ref lpcbData);
             string data = Marshal.PtrToStringUni (ptr, lpcbData / sizeof (char)).TrimEnd ('\0');
             try {
                 lock (this._messageQueue) {
                     if (this._messageQueue.Count < 1000) {
 
                         this._messageQueue.Enqueue (
-                            string.Format ("[{0}:{1}]: Query ({2} {3}) \"{4}\"",
-                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), result, lpValueName, data));
+                            string.Format ("[{0}:{1}]: Query {2} {3} return code: {4}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), lpValueName, data, result));
                     }
                 }
             } catch { }
