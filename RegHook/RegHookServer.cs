@@ -45,14 +45,21 @@ namespace RegHook {
 
             _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
 
-            var queryRegKeyHook = EasyHook.LocalHook.Create (
-                EasyHook.LocalHook.GetProcAddress ("advapi32.dll", "RegQueryValueExW"),
-                new RegQueryValueExW_Delegate (RegQueryValueExW_Hook),
+            var queryRegKeyHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
+                new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
                 this);
 
-            queryRegKeyHook.ThreadACL.SetExclusiveACL (new Int32[] { 0 });
+            var setRegValueHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueExW"),
+                new RegSetValueExW_Delegate(RegSetValueExW_Hook),
+                this);
 
-            _server.ReportMessage (EasyHook.RemoteHooking.GetCurrentProcessId (), "RegQueryValueExW hook installed");
+            queryRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -75,10 +82,57 @@ namespace RegHook {
                 }
             } catch { }
 
-            queryRegKeyHook.Dispose ();
+            queryRegKeyHook.Dispose();
+            setRegValueHook.Dispose();
 
             EasyHook.LocalHook.Release ();
         }
+
+        #region RegSetValueExW Hook
+
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr RegSetValueExW_Delegate (
+            UIntPtr hKey,
+            string lpValueName,
+            int lpReserved,
+            IntPtr type,
+            IntPtr lpData,
+            int lpcbData);
+
+        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW")]
+        public static extern IntPtr RegSetValueExW (
+            UIntPtr hKey,
+            string lpValueName,
+            int lpReserved,
+            IntPtr type,
+            IntPtr lpData,
+            int lpcbData);
+
+        IntPtr RegSetValueExW_Hook (
+            UIntPtr hKey,
+            string lpValueName,
+            int lpReserved,
+            IntPtr type,
+            IntPtr lpData,
+            int lpcbData) {
+
+            IntPtr result = RegSetValueExW (hKey, lpValueName, lpReserved, type, lpData, lpcbData);
+            string data = Marshal.PtrToStringUni (Marshal.AllocHGlobal (lpcbData), lpcbData / sizeof (char)).TrimEnd ('\0');
+            try {
+                lock (this._messageQueue) {
+                    if (this._messageQueue.Count < 1000) {
+
+                        this._messageQueue.Enqueue (
+                            string.Format ("[{0}:{1}]: Set {2} {3} return code: {4}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), lpValueName, data, result));
+                    }
+                }
+            } catch { }
+
+            return result;
+        }
+
+        #endregion
 
         #region RegQueryValueExW Hook
 
