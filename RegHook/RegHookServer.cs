@@ -45,7 +45,7 @@ namespace RegHook {
 
             _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
 
-            var queryRegKeyHook = EasyHook.LocalHook.Create(
+            var queryRegValueHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
                 new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
                 this);
@@ -55,7 +55,7 @@ namespace RegHook {
                 new RegSetValueExW_Delegate(RegSetValueExW_Hook),
                 this);
 
-            queryRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
@@ -82,7 +82,7 @@ namespace RegHook {
                 }
             } catch { }
 
-            queryRegKeyHook.Dispose();
+            queryRegValueHook.Dispose();
             setRegValueHook.Dispose();
 
             EasyHook.LocalHook.Release ();
