@@ -49,7 +49,7 @@ namespace RegHook {
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExW"),
                 new RegOpenKeyExW_Delegate(RegOpenKeyExW_Hook),
                 this);
-            
+
             var queryRegValueHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
                 new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
@@ -59,14 +59,21 @@ namespace RegHook {
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueExW"),
                 new RegSetValueExW_Delegate(RegSetValueExW_Hook),
                 this);
-            
+
+            var closeRegKeyHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCloseKey"),
+                new RegCloseKey_Delegate(RegCloseKey_Hook),
+                this);
+
             openRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCloseKey hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -92,6 +99,7 @@ namespace RegHook {
             openRegKeyHook.Dispose();
             queryRegValueHook.Dispose();
             setRegValueHook.Dispose();
+            closeRegKeyHook.Dispose();
 
             EasyHook.LocalHook.Release ();
         }
@@ -232,6 +240,34 @@ namespace RegHook {
 
         #endregion
 
+        #region RegCloseKey Hook
+
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr RegCloseKey_Delegate (
+            UIntPtr hKey);
+
+        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCloseKey")]
+        public static extern IntPtr RegCloseKey (
+            UIntPtr hKey);
+
+        IntPtr RegCloseKey_Hook (
+            UIntPtr hKey) {
+            IntPtr result = RegCloseKey (hKey);
+            try {
+                lock (this._messageQueue) {
+                    if (this._messageQueue.Count < 1000) {
+
+                        this._messageQueue.Enqueue (
+                            string.Format ("[{0}:{1}]: Close {2} return code: {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), hKey, result));
+                    }
+                }
+            } catch { }
+
+            return result;
+        }
+
+        #endregion
     }
 
 }
