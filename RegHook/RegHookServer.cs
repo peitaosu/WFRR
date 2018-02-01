@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json;
 
 namespace RegHook {
 
@@ -32,6 +34,9 @@ namespace RegHook {
 
         Queue<string> _messageQueue = new Queue<string> ();
 
+        string vreg_json = null;
+        VRegKey _vreg = null;
+
         public InjectionEntryPoint (
             EasyHook.RemoteHooking.IContext context,
             string channelName) {
@@ -44,6 +49,13 @@ namespace RegHook {
             string channelName) {
 
             _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
+
+            try {
+                vreg_json = new StreamReader (@"D:\V_REG.json").ReadToEnd ();
+                _vreg = JsonConvert.DeserializeObject<VRegKey> (vreg_json);
+            } catch (Exception e) {
+                _server.ReportException (e);
+            }
 
             var openRegKeyHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExW"),
