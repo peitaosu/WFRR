@@ -241,35 +241,68 @@ namespace RegHook {
 
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegQueryValueExW_Delegate (
-            UIntPtr hKey,
+            IntPtr hKey,
             string lpValueName,
             int lpReserved,
-            IntPtr type,
+            ref Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             ref int lpcbData);
 
         [DllImport ("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "RegQueryValueExW")]
         public static extern IntPtr RegQueryValueExW (
-            UIntPtr hKey,
+            IntPtr hKey,
             string lpValueName,
             int lpReserved,
-            IntPtr type,
+            ref Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             ref int lpcbData
-        );
+            );
 
         IntPtr RegQueryValueExW_Hook (
-            UIntPtr hKey,
+            IntPtr hKey,
             string lpValueName,
             int lpReserved,
-            IntPtr type,
+            ref Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             ref int lpcbData) {
 
-            IntPtr result = RegQueryValueExW (hKey, lpValueName, lpReserved, type, lpData, ref lpcbData);
-            IntPtr ptr = Marshal.AllocHGlobal (lpcbData);
-            RegQueryValueExW (hKey, lpValueName, lpReserved, type, ptr, ref lpcbData);
-            string data = Marshal.PtrToStringUni (ptr, lpcbData / sizeof (char)).TrimEnd ('\0');
+            IntPtr result = IntPtr.Zero;
+
+            string reg_key = Marshal.PtrToStringUni(hKey);
+            string data = "";
+            VRegKey v_reg_key_iter = _vreg;
+            try
+            {
+                foreach (string v_reg_key in reg_key.Split('\\'))
+                {
+                    v_reg_key_iter = v_reg_key_iter.Keys[v_reg_key];
+                }
+                foreach (VRegValue value in v_reg_key_iter.Values)
+                {
+                    if (value.Name == lpValueName)
+                    {
+                        switch (value.Type)
+                        {
+                            case "REG_DWORD":
+                                int dword_int = Convert.ToInt32(value.Data, 16);
+                                lpData = GCHandle.Alloc(dword_int, GCHandleType.Pinned).AddrOfPinnedObject();
+                                type = Microsoft.Win32.RegistryValueKind.DWord;
+                                data = Marshal.ReadInt32(lpData).ToString();
+                                break;
+                            case "REG_SZ":
+                                data = value.Data;
+                                lpData = GCHandle.Alloc(data, GCHandleType.Pinned).AddrOfPinnedObject();
+                                type = Microsoft.Win32.RegistryValueKind.String;
+                                break;
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                this._messageQueue.Enqueue(e.Message);
+            }
+
             try {
                 lock (this._messageQueue) {
                     if (this._messageQueue.Count < 1000) {
@@ -277,13 +310,13 @@ namespace RegHook {
                         this._messageQueue.Enqueue (
                             string.Format ("[{0}:{1}]: Query {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), lpValueName, data, result));
-                    }
+                                }
                 }
             } catch { }
 
             return result;
         }
-
+        
         #endregion
 
         #region RegCloseKey Hook
