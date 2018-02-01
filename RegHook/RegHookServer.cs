@@ -119,28 +119,62 @@ namespace RegHook {
         #region RegOpenKeyExW Hook
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegOpenKeyExW_Delegate (
-            UIntPtr hKey,
+            IntPtr hKey,
             string subKey,
             int ulOptions,
             int samDesired,
-            UIntPtr hkResult);
+            IntPtr hkResult);
 
         [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyExW")]
         public static extern IntPtr RegOpenKeyExW (
-            UIntPtr hKey,
+            IntPtr hKey,
             string subKey,
             int ulOptions,
             int samDesired,
-            UIntPtr hkResult);
+            IntPtr hkResult);
 
         IntPtr RegOpenKeyExW_Hook (
-            UIntPtr hKey,
+            IntPtr hKey,
             string subKey,
             int ulOptions,
             int samDesired,
-            UIntPtr hkResult) {
+            IntPtr hkResult) {
 
-            IntPtr result = RegOpenKeyExW (hKey, subKey, ulOptions, samDesired, hkResult);
+            IntPtr result = IntPtr.Zero;
+            string keyOpened = "";
+
+            switch (hKey.ToString())
+            {
+                case "18446744071562067968":
+                    keyOpened = "HKEY_CLASSES_ROOT\\" + subKey;
+                    break;
+                case "18446744071562067973":
+                    keyOpened = "HKEY_CURRENT_CONFIG\\" + subKey;
+                    break;
+                case "18446744071562067969":
+                    keyOpened = "HKEY_CURRENT_USER\\" + subKey;
+                    break;
+                case "18446744071562067970":
+                    keyOpened = "HKEY_LOCAL_MACHINE\\" + subKey;
+                    break;
+                case "18446744071562067971":
+                    keyOpened = "HKEY_USERS\\" + subKey;
+                    break;
+            }
+
+            VRegKey v_reg_key_iter = null;
+            try { 
+                foreach(string v_reg_key in keyOpened.Split('\\'))
+                {
+                    v_reg_key_iter = _vreg.Keys[v_reg_key];
+                }
+                GCHandle gCHandle = GCHandle.Alloc(keyOpened, GCHandleType.Pinned);
+                hkResult = gCHandle.AddrOfPinnedObject();
+            }
+            catch
+            {
+                result = new IntPtr(2);
+            }
             try {
                 lock (this._messageQueue) {
                     if (this._messageQueue.Count < 1000) {
