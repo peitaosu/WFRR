@@ -201,32 +201,67 @@ namespace RegHook {
 
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegSetValueExW_Delegate (
-            UIntPtr hKey,
+            IntPtr hKey,
+            [MarshalAs (UnmanagedType.LPStr)]
             string lpValueName,
             int lpReserved,
-            IntPtr type,
+            Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             int lpcbData);
 
         [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW")]
         public static extern IntPtr RegSetValueExW (
-            UIntPtr hKey,
+            IntPtr hKey,
+            [MarshalAs (UnmanagedType.LPStr)]
             string lpValueName,
             int lpReserved,
-            IntPtr type,
+            Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             int lpcbData);
 
         IntPtr RegSetValueExW_Hook (
-            UIntPtr hKey,
+            IntPtr hKey,
+            [MarshalAs (UnmanagedType.LPStr)]
             string lpValueName,
             int lpReserved,
-            IntPtr type,
+            Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             int lpcbData) {
 
-            IntPtr result = RegSetValueExW (hKey, lpValueName, lpReserved, type, lpData, lpcbData);
-            string data = Marshal.PtrToStringUni (Marshal.AllocHGlobal (lpcbData), lpcbData / sizeof (char)).TrimEnd ('\0');
+            IntPtr result = IntPtr.Zero;
+            string reg_key = Marshal.PtrToStringUni (hKey);
+            VRegKey v_reg_key_iter = _vreg;
+            string data = "";
+            try {
+                foreach (string v_reg_key in reg_key.Split ('\\')) {
+                    v_reg_key_iter = v_reg_key_iter.Keys[v_reg_key];
+                }
+                foreach (VRegValue value in v_reg_key_iter.Values) {
+                    if (value.Name == lpValueName) {
+                        switch (type) {
+                            case Microsoft.Win32.RegistryValueKind.DWord:
+                                value.Type = "REG_DWORD";
+                                value.Data = Marshal.ReadInt32 (lpData).ToString ("X8");
+                                data = value.Data;
+                                break;
+                            case Microsoft.Win32.RegistryValueKind.QWord:
+                                value.Type = "REG_QWORD";
+                                value.Data = Marshal.ReadInt64 (lpData).ToString ("X8");
+                                data = value.Data;
+                                break;
+                            case Microsoft.Win32.RegistryValueKind.String:
+                                value.Type = "REG_SZ";
+                                value.Data = Marshal.PtrToStringAnsi (lpData);
+                                data = value.Data;
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                this._messageQueue.Enqueue(e.Message);
+                result = new IntPtr (0x2);
+            }
+
             try {
                 lock (this._messageQueue) {
                     if (this._messageQueue.Count < 1000) {
