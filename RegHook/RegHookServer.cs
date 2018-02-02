@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
@@ -64,6 +65,11 @@ namespace RegHook {
                 new RegOpenKeyExW_Delegate(RegOpenKeyExW_Hook),
                 this);
 
+            var createRegKeyHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyW"),
+                new RegCreateKeyW_Delegate(RegCreateKeyW_Hook),
+                this);
+
             var queryRegValueHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
                 new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
@@ -80,11 +86,13 @@ namespace RegHook {
                 this);
 
             openRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            createRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCloseKey hook installed");
@@ -111,6 +119,7 @@ namespace RegHook {
             } catch { }
 
             openRegKeyHook.Dispose();
+            createRegKeyHook.Dispose();
             queryRegValueHook.Dispose();
             setRegValueHook.Dispose();
             closeRegKeyHook.Dispose();
@@ -187,6 +196,79 @@ namespace RegHook {
 
                         this._messageQueue.Enqueue (
                             string.Format ("[{0}:{1}]: Open {2} {3} return code: {4}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), hKey, subKey, result));
+                    }
+                }
+            } catch { }
+
+            return result;
+        }
+
+        #endregion
+
+
+        #region RegCreateKeyW Hook
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr RegCreateKeyW_Delegate (
+            IntPtr hKey,
+            string subKey,
+            ref IntPtr hkResult);
+
+        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyW")]
+        public static extern IntPtr RegCreateKeyW (
+            IntPtr hKey,
+            string subKey,
+            ref IntPtr hkResult);
+
+        IntPtr RegCreateKeyW_Hook (
+            IntPtr hKey,
+            string subKey,
+            ref IntPtr hkResult) {
+
+            IntPtr result = IntPtr.Zero;
+            string keyCreated = "";
+
+            switch (hKey.ToString ()) {
+                case "-2147483648":
+                    keyCreated = "HKEY_CLASSES_ROOT\\" + subKey;
+                    break;
+                case "-2147483643":
+                    keyCreated = "HKEY_CURRENT_CONFIG\\" + subKey;
+                    break;
+                case "-2147483647":
+                    keyCreated = "HKEY_CURRENT_USER\\" + subKey;
+                    break;
+                case "-2147483646":
+                    keyCreated = "HKEY_LOCAL_MACHINE\\" + subKey;
+                    break;
+                case "-2147483645":
+                    keyCreated = "HKEY_USERS\\" + subKey;
+                    break;
+            }
+
+            keyCreated = keyCreated.ToLower ();
+
+            VRegKey v_reg_key_iter = _vreg;
+            string new_key_name = "";
+
+            try {
+                foreach (string v_reg_key in keyCreated.Split ('\\')) {
+                    new_key_name = v_reg_key;
+                    v_reg_key_iter = v_reg_key_iter.Keys[v_reg_key];
+                }
+                GCHandle gCHandle = GCHandle.Alloc (keyCreated, GCHandleType.Pinned);
+                hkResult = gCHandle.AddrOfPinnedObject ();
+            } catch (Exception e) {
+                VRegKey new_key = new VRegKey ();
+                v_reg_key_iter.Keys.Add (new_key_name, new_key);
+                result = new IntPtr (0x0);
+            }
+            try {
+                lock (this._messageQueue) {
+                    if (this._messageQueue.Count < 1000) {
+
+                        this._messageQueue.Enqueue (
+                            string.Format ("[{0}:{1}]: Create {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), hKey, subKey, result));
                     }
                 }
