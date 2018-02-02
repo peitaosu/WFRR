@@ -124,7 +124,7 @@ namespace RegHook {
             string subKey,
             int ulOptions,
             int samDesired,
-            IntPtr hkResult);
+            ref IntPtr hkResult);
 
         [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyExW")]
         public static extern IntPtr RegOpenKeyExW (
@@ -132,49 +132,53 @@ namespace RegHook {
             string subKey,
             int ulOptions,
             int samDesired,
-            IntPtr hkResult);
+            ref IntPtr hkResult);
 
         IntPtr RegOpenKeyExW_Hook (
             IntPtr hKey,
             string subKey,
             int ulOptions,
             int samDesired,
-            IntPtr hkResult) {
+            ref IntPtr hkResult) {
 
             IntPtr result = IntPtr.Zero;
             string keyOpened = "";
 
             switch (hKey.ToString())
             {
-                case "18446744071562067968":
+                case "-2147483648":
                     keyOpened = "HKEY_CLASSES_ROOT\\" + subKey;
                     break;
-                case "18446744071562067973":
+                case "-2147483643":
                     keyOpened = "HKEY_CURRENT_CONFIG\\" + subKey;
                     break;
-                case "18446744071562067969":
+                case "-2147483647":
                     keyOpened = "HKEY_CURRENT_USER\\" + subKey;
                     break;
-                case "18446744071562067970":
+                case "-2147483646":
                     keyOpened = "HKEY_LOCAL_MACHINE\\" + subKey;
                     break;
-                case "18446744071562067971":
+                case "-2147483645":
                     keyOpened = "HKEY_USERS\\" + subKey;
                     break;
             }
 
-            VRegKey v_reg_key_iter = null;
-            try { 
+            keyOpened = keyOpened.ToLower ();
+
+            VRegKey v_reg_key_iter = _vreg;
+
+            try {
                 foreach(string v_reg_key in keyOpened.Split('\\'))
                 {
-                    v_reg_key_iter = _vreg.Keys[v_reg_key];
+                    v_reg_key_iter = v_reg_key_iter.Keys[v_reg_key];
                 }
                 GCHandle gCHandle = GCHandle.Alloc(keyOpened, GCHandleType.Pinned);
                 hkResult = gCHandle.AddrOfPinnedObject();
             }
-            catch
+            catch(Exception e)
             {
-                result = new IntPtr(2);
+                this._messageQueue.Enqueue(e.Message);
+                result = new IntPtr(0x2);
             }
             try {
                 lock (this._messageQueue) {
@@ -257,7 +261,7 @@ namespace RegHook {
             ref Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             ref int lpcbData
-            );
+        );
 
         IntPtr RegQueryValueExW_Hook (
             IntPtr hKey,
