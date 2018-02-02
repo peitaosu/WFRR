@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace RegHook {
 
@@ -289,15 +290,22 @@ namespace RegHook {
                         switch (value.Type)
                         {
                             case "REG_DWORD":
-                                int dword_int = Convert.ToInt32(value.Data, 16);
-                                lpData = GCHandle.Alloc(dword_int, GCHandleType.Pinned).AddrOfPinnedObject();
+                                lpcbData = Marshal.SizeOf(typeof(Int32));
+                                Marshal.WriteInt32(lpData, Convert.ToInt32(value.Data, 16));
                                 type = Microsoft.Win32.RegistryValueKind.DWord;
                                 data = Marshal.ReadInt32(lpData).ToString();
                                 break;
+                            case "REG_QWORD":
+                                lpcbData = Marshal.SizeOf(typeof(Int64));
+                                Marshal.WriteInt64(lpData, Convert.ToInt64(value.Data, 16));
+                                type = Microsoft.Win32.RegistryValueKind.QWord;
+                                data = Marshal.ReadInt64(lpData).ToString();
+                                break;
                             case "REG_SZ":
-                                data = value.Data;
-                                lpData = GCHandle.Alloc(data, GCHandleType.Pinned).AddrOfPinnedObject();
+                                lpcbData = value.Data.Length + 1;
+                                Marshal.Copy(Encoding.ASCII.GetBytes (value.Data), 0, lpData, value.Data.Length);
                                 type = Microsoft.Win32.RegistryValueKind.String;
+                                data = Marshal.PtrToStringAnsi(lpData);
                                 break;
                         }
                     }
@@ -306,6 +314,7 @@ namespace RegHook {
             catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
+                result = new IntPtr (0x2);
             }
 
             try {
@@ -313,15 +322,15 @@ namespace RegHook {
                     if (this._messageQueue.Count < 1000) {
 
                         this._messageQueue.Enqueue (
-                            string.Format ("[{0}:{1}]: Query {2} {3} return code: {4}",
-                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), lpValueName, data, result));
-                                }
+                            string.Format ("[{0}:{1}]: Query {2} {3} {4} {5} return code: {6}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId (), EasyHook.RemoteHooking.GetCurrentThreadId (), lpValueName, data, lpcbData, Marshal.ReadInt32 (lpData), result));
+                    }
                 }
             } catch { }
 
             return result;
         }
-        
+
         #endregion
 
         #region RegCloseKey Hook
