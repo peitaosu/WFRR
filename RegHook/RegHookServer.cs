@@ -34,6 +34,7 @@ namespace RegHook {
 
         Queue<string> _messageQueue = new Queue<string> ();
 
+        string vreg_path = @"V_REG.json";
         string vreg_json = null;
         VRegKey _vreg = null;
 
@@ -51,7 +52,7 @@ namespace RegHook {
             _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
 
             try {
-                vreg_json = new StreamReader (@"D:\V_REG.json").ReadToEnd ();
+                vreg_json = new StreamReader (vreg_path).ReadToEnd ();
                 _vreg = JsonConvert.DeserializeObject<VRegKey> (vreg_json);
             } catch (Exception e) {
                 _server.ReportException (e);
