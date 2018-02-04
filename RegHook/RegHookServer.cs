@@ -70,6 +70,11 @@ namespace RegHook {
                 new RegCreateKeyW_Delegate(RegCreateKeyW_Hook),
                 this);
 
+            var deleteRegKeyHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyExW"),
+                new RegDeleteKeyExW_Delegate(RegDeleteKeyExW_Hook),
+                this);
+
             var queryRegValueHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
                 new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
@@ -87,12 +92,14 @@ namespace RegHook {
 
             openRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             createRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            deleteRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCloseKey hook installed");
@@ -120,6 +127,7 @@ namespace RegHook {
 
             openRegKeyHook.Dispose();
             createRegKeyHook.Dispose();
+            deleteRegKeyHook.Dispose();
             queryRegValueHook.Dispose();
             setRegValueHook.Dispose();
             closeRegKeyHook.Dispose();
@@ -280,6 +288,96 @@ namespace RegHook {
             } catch { }
 
             return result;
+        }
+
+        #endregion
+
+        #region RegDeleteKeyExW Hook
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr RegDeleteKeyExW_Delegate(
+            IntPtr hKey,
+            string subKey,
+            int samDesired,
+            int Reserved);
+
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegDeleteKeyExW")]
+        public static extern IntPtr RegDeleteKeyExW(
+            IntPtr hKey,
+            string subKey,
+            int samDesired,
+            int Reserved);
+
+        IntPtr RegDeleteKeyExW_Hook(
+            IntPtr hKey,
+            string subKey,
+            int samDesired,
+            int Reserved)
+        {
+            IntPtr result = IntPtr.Zero;
+            string keyDeleted = "";
+
+            switch (hKey.ToString())
+            {
+                case "-2147483648":
+                    keyDeleted = "HKEY_CLASSES_ROOT\\" + subKey;
+                    break;
+                case "-2147483643":
+                    keyDeleted = "HKEY_CURRENT_CONFIG\\" + subKey;
+                    break;
+                case "-2147483647":
+                    keyDeleted = "HKEY_CURRENT_USER\\" + subKey;
+                    break;
+                case "-2147483646":
+                    keyDeleted = "HKEY_LOCAL_MACHINE\\" + subKey;
+                    break;
+                case "-2147483645":
+                    keyDeleted = "HKEY_USERS\\" + subKey;
+                    break;
+            }
+
+            keyDeleted = keyDeleted.ToLower();
+
+            VRegKey v_reg_key_iter = _vreg;
+            VRegKey v_reg_key_iter_parent = v_reg_key_iter;
+            string new_key_name = "";
+
+            try
+            {
+                foreach (string v_reg_key in keyDeleted.Split('\\'))
+                {
+                    new_key_name = v_reg_key;
+                    v_reg_key_iter_parent = v_reg_key_iter;
+                    v_reg_key_iter = v_reg_key_iter.Keys[v_reg_key];
+                }
+                v_reg_key_iter_parent.Keys.Remove(keyDeleted.Split('\\')[keyDeleted.Split('\\').Length - 1]);
+                string vreg_output = JsonConvert.SerializeObject(_vreg);
+                using (StreamWriter vreg_outfile = new StreamWriter(vreg_path, false))
+                {
+                    vreg_outfile.WriteLine(vreg_output);
+                }
+                result = new IntPtr(0x0);
+            }
+            catch
+            {
+                result = new IntPtr(0x2);
+            }
+            try
+            {
+                lock (this._messageQueue)
+                {
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hKey, subKey, result));
+                    }
+                }
+            }
+            catch { }
+
+            return result;
+
         }
 
         #endregion
