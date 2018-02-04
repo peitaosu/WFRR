@@ -258,9 +258,14 @@ namespace RegHook {
                 }
                 GCHandle gCHandle = GCHandle.Alloc (keyCreated, GCHandleType.Pinned);
                 hkResult = gCHandle.AddrOfPinnedObject ();
-            } catch (Exception e) {
+            } catch {
                 VRegKey new_key = new VRegKey ();
                 v_reg_key_iter.Keys.Add (new_key_name, new_key);
+                string vreg_output = JsonConvert.SerializeObject(_vreg);
+                using (StreamWriter vreg_outfile = new StreamWriter(vreg_path, false))
+                {
+                    vreg_outfile.WriteLine(vreg_output);
+                }
                 result = new IntPtr (0x0);
             }
             try {
