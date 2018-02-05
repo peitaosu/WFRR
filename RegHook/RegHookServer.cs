@@ -100,9 +100,24 @@ namespace RegHook {
                 new RegCreateKeyEx_Delegate(RegCreateKeyEx_Hook),
                 this);
 
-            var deleteRegKeyHook = EasyHook.LocalHook.Create(
+            var regDeleteKeyAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyA"),
+                new RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
+                this);
+
+            var regDeleteKeyWHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyW"),
+                new RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
+                this);
+
+            var regDeleteKeyExAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyExA"),
+                new RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
+                this);
+
+            var regDeleteKeyExWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyExW"),
-                new RegDeleteKeyExW_Delegate(RegDeleteKeyExW_Hook),
+                new RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
                 this);
 
             var queryRegValueHook = EasyHook.LocalHook.Create(
@@ -128,7 +143,10 @@ namespace RegHook {
             regCreateKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regCreateKeyExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regCreateKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            deleteRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regDeleteKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regDeleteKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regDeleteKeyExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regDeleteKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
@@ -141,6 +159,9 @@ namespace RegHook {
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
@@ -175,7 +196,10 @@ namespace RegHook {
             regCreateKeyWHook.Dispose();
             regCreateKeyExAHook.Dispose();
             regCreateKeyExWHook.Dispose();
-            deleteRegKeyHook.Dispose();
+            regDeleteKeyAHook.Dispose();
+            regDeleteKeyWHook.Dispose();
+            regDeleteKeyExAHook.Dispose();
+            regDeleteKeyExWHook.Dispose();
             queryRegValueHook.Dispose();
             setRegValueHook.Dispose();
             closeRegKeyHook.Dispose();
@@ -325,15 +349,15 @@ namespace RegHook {
 
         #endregion
 
-        #region RegDeleteKeyExW Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr RegDeleteKeyExW_Delegate(
+        #region RegDeleteKeyEx Hook
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
+        delegate IntPtr RegDeleteKeyEx_Delegate(
             IntPtr hKey,
             string subKey,
             int samDesired,
             int Reserved);
 
-        IntPtr RegDeleteKeyExW_Hook(
+        IntPtr RegDeleteKeyEx_Hook(
             IntPtr hKey,
             string subKey,
             int samDesired,
