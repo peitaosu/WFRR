@@ -144,14 +144,6 @@ namespace RegHook {
             int samDesired,
             ref IntPtr hkResult);
 
-        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyExW")]
-        public static extern IntPtr RegOpenKeyExW (
-            IntPtr hKey,
-            string subKey,
-            int ulOptions,
-            int samDesired,
-            ref IntPtr hkResult);
-
         IntPtr RegOpenKeyExW_Hook (
             IntPtr hKey,
             string subKey,
@@ -214,16 +206,9 @@ namespace RegHook {
 
         #endregion
 
-
         #region RegCreateKeyW Hook
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegCreateKeyW_Delegate (
-            IntPtr hKey,
-            string subKey,
-            ref IntPtr hkResult);
-
-        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyW")]
-        public static extern IntPtr RegCreateKeyW (
             IntPtr hKey,
             string subKey,
             ref IntPtr hkResult);
@@ -295,13 +280,6 @@ namespace RegHook {
         #region RegDeleteKeyExW Hook
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegDeleteKeyExW_Delegate(
-            IntPtr hKey,
-            string subKey,
-            int samDesired,
-            int Reserved);
-
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegDeleteKeyExW")]
-        public static extern IntPtr RegDeleteKeyExW(
             IntPtr hKey,
             string subKey,
             int samDesired,
@@ -394,16 +372,6 @@ namespace RegHook {
             IntPtr lpData,
             int lpcbData);
 
-        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegSetValueExW")]
-        public static extern IntPtr RegSetValueExW (
-            IntPtr hKey,
-            [MarshalAs (UnmanagedType.LPStr)]
-            string lpValueName,
-            int lpReserved,
-            Microsoft.Win32.RegistryValueKind type,
-            IntPtr lpData,
-            int lpcbData);
-
         IntPtr RegSetValueExW_Hook (
             IntPtr hKey,
             [MarshalAs (UnmanagedType.LPStr)]
@@ -473,16 +441,6 @@ namespace RegHook {
             ref Microsoft.Win32.RegistryValueKind type,
             IntPtr lpData,
             ref int lpcbData);
-
-        [DllImport ("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "RegQueryValueExW")]
-        public static extern IntPtr RegQueryValueExW (
-            IntPtr hKey,
-            string lpValueName,
-            int lpReserved,
-            ref Microsoft.Win32.RegistryValueKind type,
-            IntPtr lpData,
-            ref int lpcbData
-        );
 
         IntPtr RegQueryValueExW_Hook (
             IntPtr hKey,
@@ -557,10 +515,6 @@ namespace RegHook {
 
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegCloseKey_Delegate (
-            IntPtr hKey);
-
-        [DllImport ("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCloseKey")]
-        public static extern IntPtr RegCloseKey (
             IntPtr hKey);
 
         IntPtr RegCloseKey_Hook (
