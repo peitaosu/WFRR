@@ -120,9 +120,24 @@ namespace RegHook {
                 new RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
                 this);
 
-            var queryRegValueHook = EasyHook.LocalHook.Create(
+            var regQueryValueAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueA"),
+                new RegQueryValueEx_Delegate(RegQueryValueEx_Hook),
+                this);
+
+            var regQueryValueWHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueW"),
+                new RegQueryValueEx_Delegate(RegQueryValueEx_Hook),
+                this);
+
+            var regQueryValueExAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExA"),
+                new RegQueryValueEx_Delegate(RegQueryValueEx_Hook),
+                this);
+
+            var regQueryValueExWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegQueryValueExW"),
-                new RegQueryValueExW_Delegate(RegQueryValueExW_Hook),
+                new RegQueryValueEx_Delegate(RegQueryValueEx_Hook),
                 this);
 
             var setRegValueHook = EasyHook.LocalHook.Create(
@@ -147,7 +162,10 @@ namespace RegHook {
             regDeleteKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regDeleteKeyExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regDeleteKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regQueryValueAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regQueryValueWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regQueryValueExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regQueryValueExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
@@ -163,6 +181,9 @@ namespace RegHook {
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueAhook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCloseKey hook installed");
@@ -200,7 +221,10 @@ namespace RegHook {
             regDeleteKeyWHook.Dispose();
             regDeleteKeyExAHook.Dispose();
             regDeleteKeyExWHook.Dispose();
-            queryRegValueHook.Dispose();
+            regQueryValueAHook.Dispose();
+            regQueryValueWHook.Dispose();
+            regQueryValueExAHook.Dispose();
+            regQueryValueExWHook.Dispose();
             setRegValueHook.Dispose();
             closeRegKeyHook.Dispose();
 
@@ -503,10 +527,10 @@ namespace RegHook {
 
         #endregion
 
-        #region RegQueryValueExW Hook
+        #region RegQueryValueEx Hook
 
-        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr RegQueryValueExW_Delegate (
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
+        delegate IntPtr RegQueryValueEx_Delegate (
             IntPtr hKey,
             string lpValueName,
             int lpReserved,
@@ -514,7 +538,7 @@ namespace RegHook {
             IntPtr lpData,
             ref int lpcbData);
 
-        IntPtr RegQueryValueExW_Hook (
+        IntPtr RegQueryValueEx_Hook (
             IntPtr hKey,
             string lpValueName,
             int lpReserved,
