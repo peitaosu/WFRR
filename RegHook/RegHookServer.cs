@@ -140,9 +140,24 @@ namespace RegHook {
                 new RegQueryValueEx_Delegate(RegQueryValueEx_Hook),
                 this);
 
-            var setRegValueHook = EasyHook.LocalHook.Create(
+            var regSetValueAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueA"),
+                new RegSetValueEx_Delegate(RegSetValueEx_Hook),
+                this);
+
+            var regSetValueWHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueW"),
+                new RegSetValueEx_Delegate(RegSetValueEx_Hook),
+                this);
+
+            var regSetValueExAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueExA"),
+                new RegSetValueEx_Delegate(RegSetValueEx_Hook),
+                this);
+
+            var regSetValueExWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegSetValueExW"),
-                new RegSetValueExW_Delegate(RegSetValueExW_Hook),
+                new RegSetValueEx_Delegate(RegSetValueEx_Hook),
                 this);
 
             var closeRegKeyHook = EasyHook.LocalHook.Create(
@@ -166,7 +181,10 @@ namespace RegHook {
             regQueryValueWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regQueryValueExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regQueryValueExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regSetValueAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regSetValueWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regSetValueExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regSetValueExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyA hook installed");
@@ -185,6 +203,9 @@ namespace RegHook {
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegQueryValueExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegSetValueExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCloseKey hook installed");
 
@@ -225,7 +246,10 @@ namespace RegHook {
             regQueryValueWHook.Dispose();
             regQueryValueExAHook.Dispose();
             regQueryValueExWHook.Dispose();
-            setRegValueHook.Dispose();
+            regSetValueAHook.Dispose();
+            regSetValueWHook.Dispose();
+            regSetValueExAHook.Dispose();
+            regSetValueExWHook.Dispose();
             closeRegKeyHook.Dispose();
 
             EasyHook.LocalHook.Release ();
@@ -456,10 +480,10 @@ namespace RegHook {
 
         #endregion
 
-        #region RegSetValueExW Hook
+        #region RegSetValueEx Hook
 
-        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr RegSetValueExW_Delegate (
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
+        delegate IntPtr RegSetValueEx_Delegate (
             IntPtr hKey,
             [MarshalAs (UnmanagedType.LPStr)]
             string lpValueName,
@@ -468,7 +492,7 @@ namespace RegHook {
             IntPtr lpData,
             int lpcbData);
 
-        IntPtr RegSetValueExW_Hook (
+        IntPtr RegSetValueEx_Hook (
             IntPtr hKey,
             [MarshalAs (UnmanagedType.LPStr)]
             string lpValueName,
