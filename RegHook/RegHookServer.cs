@@ -60,9 +60,19 @@ namespace RegHook {
                 _server.ReportException (e);
             }
 
-            var openRegKeyHook = EasyHook.LocalHook.Create(
+            var regOpenKeyAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyA"),
+                new RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
+                this);
+
+            var regOpenKeyExAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExA"),
+                new RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
+                this);
+
+            var regOpenKeyExWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExW"),
-                new RegOpenKeyExW_Delegate(RegOpenKeyExW_Hook),
+                new RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
                 this);
 
             var createRegKeyHook = EasyHook.LocalHook.Create(
@@ -90,13 +100,17 @@ namespace RegHook {
                 new RegCloseKey_Delegate(RegCloseKey_Hook),
                 this);
 
-            openRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regOpenKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regOpenKeyExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regOpenKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             createRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             deleteRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             queryRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             setRegValueHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExW hook installed");
@@ -125,7 +139,9 @@ namespace RegHook {
                 }
             } catch { }
 
-            openRegKeyHook.Dispose();
+            regOpenKeyAHook.Dispose();
+            regOpenKeyExAHook.Dispose();
+            regOpenKeyExWHook.Dispose();
             createRegKeyHook.Dispose();
             deleteRegKeyHook.Dispose();
             queryRegValueHook.Dispose();
@@ -135,16 +151,16 @@ namespace RegHook {
             EasyHook.LocalHook.Release ();
         }
 
-        #region RegOpenKeyExW Hook
-        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr RegOpenKeyExW_Delegate (
+        #region RegOpenKeyEx Hook
+        [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
+        delegate IntPtr RegOpenKeyEx_Delegate (
             IntPtr hKey,
             string subKey,
             int ulOptions,
             int samDesired,
             ref IntPtr hkResult);
 
-        IntPtr RegOpenKeyExW_Hook (
+        IntPtr RegOpenKeyEx_Hook (
             IntPtr hKey,
             string subKey,
             int ulOptions,
