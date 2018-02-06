@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace WinRegRedirector {
@@ -74,8 +75,25 @@ namespace WinRegRedirector {
                 if (targetPID > 0) {
                     break;
                 }
+                if (args.Length != 0 && args[0].EndsWith(".exe") && !args[0].Contains("\\"))
+                {
+                    Console.WriteLine("Find Process: " + args[0]);
+                    while (true)
+                    {
+                        Process[] processlist = Process.GetProcesses();
+                        foreach (Process theprocess in processlist)
+                        {
+                            if (string.Equals(args[0].Substring(0, args[0].Length - 4), theprocess.ProcessName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                targetPID = theprocess.Id;
+                                return;
+                            }
+                        }
+                    }
+                }
                 if (args.Length != 1 || !File.Exists (args[0])) {
                     Console.WriteLine ("Usage: WinRegRedirector ProcessID");
+                    Console.WriteLine ("   or: WinRegRedirector ProcessName.exe");
                     Console.WriteLine ("   or: WinRegRedirector PathToExecutable");
                     Console.Write ("> ");
 
