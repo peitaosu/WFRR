@@ -7,12 +7,13 @@ namespace WinRegRedirector {
         static void Main (string[] args) {
             Int32 targetPID = 0;
             string targetExe = null;
+            string targetArg = "";
 
             // Will contain the name of the IPC server channel
             string channelName = null;
 
             // Process command line arguments or print instructions and retrieve argument value
-            ProcessArgs (args, out targetPID, out targetExe);
+            ProcessArgs (args, out targetPID, out targetExe, out targetArg);
 
             if (targetPID <= 0 && string.IsNullOrEmpty (targetExe))
                 return;
@@ -43,7 +44,7 @@ namespace WinRegRedirector {
                     // start and inject into a new process
                     EasyHook.RemoteHooking.CreateAndInject (
                         targetExe, // executable to run
-                        "", // command line arguments for target
+                        targetArg, // command line arguments for target
                         0, // additional process creation flags to pass to CreateProcess
                         EasyHook.InjectionOptions.DoNotRequireStrongName, // allow injectionLibrary to be unsigned
                         injectionLibrary, // 32-bit library to inject (if target is 32-bit)
@@ -66,9 +67,10 @@ namespace WinRegRedirector {
             Console.ReadKey ();
         }
 
-        static void ProcessArgs (string[] args, out int targetPID, out string targetExe) {
+        static void ProcessArgs (string[] args, out int targetPID, out string targetExe, out string targetArg) {
             targetPID = 0;
             targetExe = null;
+            targetArg = "";
 
             // Load any parameters
             while ((args.Length != 1) || !Int32.TryParse (args[0], out targetPID) || !File.Exists (args[0])) {
@@ -92,6 +94,16 @@ namespace WinRegRedirector {
                     }
                 }
                 if (args.Length != 1 || !File.Exists (args[0])) {
+                    if (args.Length == 1 && args[0].Contains(".exe"))
+                    {
+                        string exePath = args[0].Substring(0, args[0].IndexOf(".exe") + 4);
+                        if (File.Exists(exePath))
+                        {
+                            targetExe = exePath;
+                            targetArg = args[0].Substring(args[0].IndexOf(".exe") + 4, args[0].Length - exePath.Length);
+                            break;
+                        }
+                    }
                     Console.WriteLine ("Usage: WinRegRedirector ProcessID");
                     Console.WriteLine ("   or: WinRegRedirector ProcessName.exe");
                     Console.WriteLine ("   or: WinRegRedirector PathToExecutable");
