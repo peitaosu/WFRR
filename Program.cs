@@ -73,7 +73,7 @@ namespace WinRegRedirector {
             targetArg = "";
 
             // Load any parameters
-            while ((args.Length != 1) || !Int32.TryParse (args[0], out targetPID) || !File.Exists (args[0])) {
+            while ((args.Length == 0) || !Int32.TryParse (args[0], out targetPID) || !File.Exists (args[0])) {
                 if (targetPID > 0) {
                     break;
                 }
