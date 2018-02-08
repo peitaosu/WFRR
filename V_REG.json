@@ -1,0 +1,22 @@
+{
+    "hkey_classes_root": {
+        "Keys": {},
+        "Values": []
+    },
+    "hkey_current_user": {
+        "Keys": {},
+        "Values": []
+    },
+    "hkey_local_machine": {
+        "Keys": {},
+        "Values": []
+    },
+    "hkey_users": {
+        "Keys": {},
+        "Values": []
+    },
+    "hkey_current_config": {
+        "Keys": {},
+        "Values": []
+    }
+}
