@@ -653,12 +653,20 @@ namespace RegHook {
         [UnmanagedFunctionPointer (CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr RegCloseKey_Delegate (
             IntPtr hKey);
+  
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCloseKey")]
+        public static extern IntPtr RegCloseKey(
+            IntPtr hKey);
 
         IntPtr RegCloseKey_Hook (
             IntPtr hKey) {
 
             IntPtr result = IntPtr.Zero;
             try {
+                if (!Marshal.PtrToStringUni(hKey).StartsWith("HKEY"))
+                {
+                    result = RegCloseKey(hKey);
+                }
                 lock (this._messageQueue) {
                     if (this._messageQueue.Count < 1000) {
 
