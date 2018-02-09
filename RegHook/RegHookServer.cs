@@ -570,6 +570,15 @@ namespace RegHook {
             IntPtr lpData,
             ref int lpcbData);
 
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "RegQueryValueExW")]
+        public static extern IntPtr RegQueryValueExW(
+            IntPtr hKey,
+            string lpValueName,
+            int lpReserved,
+            ref Microsoft.Win32.RegistryValueKind type,
+            IntPtr lpData,
+            ref int lpcbData);
+
         IntPtr RegQueryValueEx_Hook (
             IntPtr hKey,
             string lpValueName,
@@ -620,7 +629,7 @@ namespace RegHook {
             catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
-                result = new IntPtr (0x2);
+                result = RegQueryValueExW(hKey, lpValueName, lpReserved, ref type, lpData, ref lpcbData);
             }
 
             try {
