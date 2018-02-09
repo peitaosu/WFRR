@@ -264,6 +264,14 @@ namespace RegHook {
             int samDesired,
             ref IntPtr hkResult);
 
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyExW")]
+        public static extern IntPtr RegOpenKeyExW(
+            IntPtr hKey,
+            string subKey,
+            int ulOptions,
+            int samDesired,
+            ref IntPtr hkResult);
+
         IntPtr RegOpenKeyEx_Hook (
             IntPtr hKey,
             string subKey,
@@ -308,7 +316,7 @@ namespace RegHook {
             catch(Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
-                result = new IntPtr(0x2);
+                result = RegOpenKeyExW(hKey, subKey, ulOptions, samDesired, ref hkResult);
             }
             try {
                 lock (this._messageQueue) {
