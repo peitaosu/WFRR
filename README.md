@@ -11,6 +11,32 @@
 * RegQueryValue(Ex)
 * RegCloseKey
 
+## V_REG.json Sample
+```
+{
+    "hkey_local_machine": {
+        "Keys": {
+            "software":{
+                "Keys": {
+                    "microsoft": {
+                        "Keys": {},
+                        "Values": []
+                    }
+                },
+                "Values": []
+            }
+        },
+        "Values": [
+            {
+                "Name": "value_name",
+                "Type": "REG_DWORD",
+                "Data": "0x00000001"
+            }
+        ]
+    }
+}
+```
+
 ## Usage
 ```
 WinRegRedirector ProcessID
