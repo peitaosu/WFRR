@@ -1,4 +1,6 @@
 # Windows Registry Redirection
+[![GitHub license](https://img.shields.io/github/license/peitaosu/Win-Reg-Redirect.svg)](https://github.com/peitaosu/Win-Reg-Redirect/blob/master/LICENSE)
+
 
 ## Requirements
 * EasyHook
