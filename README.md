@@ -1,6 +1,7 @@
 # Windows Registry Redirection
 [![GitHub license](https://img.shields.io/github/license/peitaosu/Win-Reg-Redirect.svg)](https://github.com/peitaosu/Win-Reg-Redirect/blob/master/LICENSE)
 
+This project is supposed to redirect all registry calls of process to virtual registry.
 
 ## Requirements
 * EasyHook
