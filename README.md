@@ -41,6 +41,9 @@ This project is supposed to redirect all registry calls of process to virtual re
 ```
 
 ## Usage
+
+Please put `V_REG.json` in the same location as WinRegRedirector.exe.
+
 ```
 WinRegRedirector ProcessID
                  ProcessName.exe
