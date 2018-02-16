@@ -17,25 +17,27 @@ This project is supposed to redirect all registry calls of process to virtual re
 ## V_REG.json Sample
 ```
 {
-    "hkey_local_machine": {
-        "Keys": {
-            "software":{
-                "Keys": {
-                    "microsoft": {
-                        "Keys": {},
-                        "Values": []
-                    }
-                },
-                "Values": []
-            }
-        },
-        "Values": [
-            {
-                "Name": "value_name",
-                "Type": "REG_DWORD",
-                "Data": "0x00000001"
-            }
-        ]
+    "Keys": {
+        "hkey_local_machine": {
+            "Keys": {
+                "software":{
+                    "Keys": {
+                        "microsoft": {
+                            "Keys": {},
+                            "Values": []
+                        }
+                    },
+                    "Values": []
+                }
+            },
+            "Values": [
+                {
+                    "Name": "value_name",
+                    "Type": "REG_DWORD",
+                    "Data": "0x00000001"
+                }
+            ]
+        }
     }
 }
 ```
