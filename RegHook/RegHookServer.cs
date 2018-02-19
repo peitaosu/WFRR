@@ -160,7 +160,7 @@ namespace RegHook {
                 new RegSetValueEx_Delegate(RegSetValueEx_Hook),
                 this);
 
-            var closeRegKeyHook = EasyHook.LocalHook.Create(
+            var regCloseKeyHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCloseKey"),
                 new RegCloseKey_Delegate(RegCloseKey_Hook),
                 this);
@@ -185,7 +185,7 @@ namespace RegHook {
             regSetValueWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regSetValueExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             regSetValueExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            closeRegKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            regCloseKeyHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
 
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyA hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyW hook installed");
@@ -250,7 +250,7 @@ namespace RegHook {
             regSetValueWHook.Dispose();
             regSetValueExAHook.Dispose();
             regSetValueExWHook.Dispose();
-            closeRegKeyHook.Dispose();
+            regCloseKeyHook.Dispose();
 
             EasyHook.LocalHook.Release ();
         }
