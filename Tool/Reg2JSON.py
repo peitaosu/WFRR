@@ -25,8 +25,23 @@ def convert_reg_str_to_json(reg_str_list):
                     cur_dict = cur_dict['Keys'][reg_key]
                 else:
                     cur_dict = cur_dict['Keys'][reg_key]
+            cur_key = cur_dict
         else:
-            continue
+            value_name = reg_str.split('=')[0].strip('"')
+            value_content = reg_str.split('=')[1]
+            if value_content.startswith('"'):
+                value_type = "REG_SZ"
+                value_data = value_content.strip('"')
+            elif value_content.startswith('dword'):
+                value_type = "REG_DWORD"
+                value_data = value_content.split(':')[1]
+            cur_key['Values'].append(
+                {
+                    "Name": value_name,
+                    "Type": value_type,
+                    "Data": value_data
+                }
+            )
     return reg_dict
 
 def save_json_str_to_file(reg_dict, json_file_path):
