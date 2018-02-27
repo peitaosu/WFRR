@@ -17,6 +17,7 @@ def convert_reg_str_to_json(reg_str_list):
             reg_str = reg_str[1:-1]
             cur_dict = reg_dict
             for reg_key in reg_str.split('\\'):
+                reg_key = reg_key.lower()
                 if reg_key not in cur_dict['Keys'].keys():
                     cur_dict['Keys'][reg_key] = {
                         "Keys": {},
