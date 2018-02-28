@@ -57,3 +57,9 @@ WinRegRedirector ProcessID
 > WinRegRedirector notepad.exe
 > WinRegRedirector C:\Windows\notepad.exe
 ```
+
+## Convert V_REG.json from .reg file
+
+```
+> python Tool\Reg2JSON.py in.reg out.json
+```
