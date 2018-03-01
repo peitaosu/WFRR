@@ -50,8 +50,8 @@ def save_json_str_to_file(reg_dict, json_file_path):
         json.dump(reg_dict, json_file)
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        print 'Please provide reg file.'
+    if len(sys.argv) != 3:
+        print 'Usage: python Reg2JSON.py in.reg out.json'
     else:
         reg = get_reg_str_list(sys.argv[1])
         reg_dict = convert_reg_str_to_json(reg)
