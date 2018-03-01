@@ -4,7 +4,8 @@
 This project is supposed to redirect all registry calls of process to virtual registry.
 
 ## Requirements
-* EasyHook
+* EasyHook (WinRegRedirector.exe)
+* python 2.x (Reg2JSON.py)
 
 ## Supported APIs
 * RegOpenKey(Ex)
@@ -47,15 +48,15 @@ This project is supposed to redirect all registry calls of process to virtual re
 Please put `V_REG.json` in the same location as WinRegRedirector.exe.
 
 ```
-WinRegRedirector ProcessID
-                 ProcessName.exe
-                 PathToExecutable
+WinRegRedirector.exe ProcessID
+                     ProcessName.exe
+                     PathToExecutable
 
 #example
 
-> WinRegRedirector 1234
-> WinRegRedirector notepad.exe
-> WinRegRedirector C:\Windows\notepad.exe
+> WinRegRedirector.exe 1234
+> WinRegRedirector.exe notepad.exe
+> WinRegRedirector.exe C:\Windows\notepad.exe
 ```
 
 ## Convert V_REG.json from .reg file
