@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WinRegRedirector")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Windows Registry Redirector")]
+[assembly: AssemblyDescription("Windows Registry Redirector")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WinRegRedirector")]
+[assembly: AssemblyProduct("Windows Registry Redirector")]
 [assembly: AssemblyCopyright("Copyright © Tony Su 2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
