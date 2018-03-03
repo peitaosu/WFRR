@@ -36,6 +36,9 @@ def convert_reg_str_to_json(reg_str_list):
             elif value_content.startswith('dword'):
                 value_type = "REG_DWORD"
                 value_data = value_content.split(':')[1]
+            elif value_content.startswith('qword'):
+                value_type = "REG_QWORD"
+                value_data = value_content.split(':')[1]
             cur_key['Values'].append(
                 {
                     "Name": value_name,
