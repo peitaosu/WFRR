@@ -535,6 +535,11 @@ namespace RegHook {
                                 value.Data = Marshal.PtrToStringAnsi (lpData);
                                 data = value.Data;
                                 break;
+                            case Microsoft.Win32.RegistryValueKind.Binary:
+                                value.Type = "REG_BINARY";
+                                value.Data = Marshal.PtrToStringBSTR (lpData);
+                                data = value.Data;
+                                break;
                         }
                     }
                 }
@@ -621,6 +626,12 @@ namespace RegHook {
                                 Marshal.Copy(Encoding.ASCII.GetBytes (value.Data), 0, lpData, value.Data.Length);
                                 type = Microsoft.Win32.RegistryValueKind.String;
                                 data = Marshal.PtrToStringAnsi(lpData);
+                                break;
+                            case "REG_BINARY":
+                                lpcbData = value.Data.Length + 1;
+                                Marshal.Copy(Encoding.ASCII.GetBytes (value.Data), 0, lpData, value.Data.Length);
+                                type = Microsoft.Win32.RegistryValueKind.Binary;
+                                data = Marshal.PtrToStringBSTR(lpData);
                                 break;
                         }
                     }
