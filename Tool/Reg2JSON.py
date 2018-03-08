@@ -2,7 +2,7 @@ import os, sys, json
 
 def get_reg_str_list(reg_file_path):
     with open(reg_file_path) as reg_file:
-        reg = reg_file.read().decode('utf-16').split('\r\n')
+        reg = reg_file.read().decode('utf-16').replace('\\\r\n  ', '').split('\r\n')
     return filter(None, reg)
 
 def convert_reg_str_to_json(reg_str_list):
