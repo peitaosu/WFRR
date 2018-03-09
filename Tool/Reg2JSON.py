@@ -41,7 +41,7 @@ def convert_reg_str_to_json(reg_str_list):
                 value_data = value_content.split(':')[1]
             elif value_content.startswith('hex'):
                 value_type = "REG_BINARY"
-                value_data = value_content.split(':')[1]
+                value_data = value_content.split(':')[1].replace(',', '')
             cur_key['Values'].append(
                 {
                     "Name": value_name,
