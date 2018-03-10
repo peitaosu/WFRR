@@ -63,4 +63,6 @@ WinRegRedirector.exe ProcessID
 
 ```
 > python Tool\Reg2JSON.py in.reg out.json
+
+# suppose the in.reg is using utf-16, if not, please change the encoding in get_reg_str_list()
 ```

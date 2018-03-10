@@ -2,6 +2,7 @@ import os, sys, json
 
 def get_reg_str_list(reg_file_path):
     with open(reg_file_path) as reg_file:
+        # suppose the input file using utf-16 because it's default encoding of regedit exported file
         reg = reg_file.read().decode('utf-16').replace('\\\r\n  ', '').split('\r\n')
     return filter(None, reg)
 
