@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using System.Text;
+using System.Reflection;
 
 namespace RegHook {
 
@@ -36,7 +37,7 @@ namespace RegHook {
 
         Queue<string> _messageQueue = new Queue<string> ();
 
-        string vreg_path = @"V_REG.json";
+        string vreg_path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "V_REG.json");
         string vreg_json = null;
         VRegKey _vreg = null;
 
