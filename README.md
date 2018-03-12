@@ -4,8 +4,11 @@
 This project is supposed to redirect all registry calls of process to virtual registry.
 
 ## Requirements
-* EasyHook (WinRegRedirector.exe)
-* python 2.x (Reg2JSON.py)
+- WinRegRedirector.exe
+   * EasyHook 
+   * Newtonsoft.Json
+- Reg2JSON.py
+   * python 2.x
 
 ## Supported APIs
 * RegOpenKey(Ex)
