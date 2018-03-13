@@ -19,6 +19,8 @@ This project is supposed to redirect all registry calls of process to virtual re
 * RegCloseKey
 
 ## V_REG.json Sample
+* Keys: please use the key name with lower case.
+* Values: support REG_DWORD, REG_QWORD, REG_SZ and REG_BINARY types.
 ```
 {
     "Keys": {
