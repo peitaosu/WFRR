@@ -4,7 +4,7 @@
 This project is supposed to redirect all registry calls of process to virtual registry.
 
 ## Requirements
-- WinRegRedirector.exe
+- WinRegRedirector.exe - use NuGet Package Manager to install these dependencies for project
    * EasyHook 
    * Newtonsoft.Json
 - Reg2JSON.py
