@@ -7,8 +7,8 @@
     <ProjectGuid>{E7B38EB9-0FE2-4721-B5FA-E85B81191D4F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WinRegRedirector</RootNamespace>
-    <AssemblyName>WinRegRedirector</AssemblyName>
+    <RootNamespace>WinFSRegRedirector</RootNamespace>
+    <AssemblyName>WinFSRegRedirector</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

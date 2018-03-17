@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace WinRegRedirector {
+namespace WinFSRegRedirector {
     class Program {
         static void Main (string[] args) {
             Int32 targetPID = 0;
@@ -104,9 +104,9 @@ namespace WinRegRedirector {
                             break;
                         }
                     }
-                    Console.WriteLine ("Usage: WinRegRedirector ProcessID");
-                    Console.WriteLine ("   or: WinRegRedirector ProcessName.exe");
-                    Console.WriteLine ("   or: WinRegRedirector PathToExecutable");
+                    Console.WriteLine ("Usage: WinFSRegRedirector ProcessID");
+                    Console.WriteLine ("   or: WinFSRegRedirector ProcessName.exe");
+                    Console.WriteLine ("   or: WinFSRegRedirector PathToExecutable");
                     Console.Write ("> ");
 
                     args = new string[] { Console.ReadLine () };

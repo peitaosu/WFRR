@@ -1,10 +1,10 @@
-# Windows Registry Redirection
+# Windows File/Registry Redirection
 [![GitHub license](https://img.shields.io/github/license/peitaosu/Win-Reg-Redirect.svg)](https://github.com/peitaosu/Win-Reg-Redirect/blob/master/LICENSE)
 
-This project is supposed to redirect all registry calls of process to virtual registry.
+This project is supposed to redirect all registry calls of process to virtual file system/registry.
 
 ## Requirements
-- WinRegRedirector.exe - use NuGet Package Manager to install these dependencies for project
+- WinFSRegRedirector.exe - use NuGet Package Manager to install these dependencies for project
    * EasyHook 
    * Newtonsoft.Json
 - Reg2JSON.py
@@ -50,18 +50,18 @@ This project is supposed to redirect all registry calls of process to virtual re
 
 ## Usage
 
-Please put `V_REG.json` in the same location as WinRegRedirector.exe.
+Please put `V_REG.json` in the same location as WinFSRegRedirector.exe.
 
 ```
-WinRegRedirector.exe ProcessID
+WinFSRegRedirector.exe ProcessID
                      ProcessName.exe
                      PathToExecutable
 
 #example
 
-> WinRegRedirector.exe 1234
-> WinRegRedirector.exe notepad.exe
-> WinRegRedirector.exe C:\Windows\notepad.exe
+> WinFSRegRedirector.exe 1234
+> WinFSRegRedirector.exe notepad.exe
+> WinFSRegRedirector.exe C:\Windows\notepad.exe
 ```
 
 ## Convert V_REG.json from .reg file
