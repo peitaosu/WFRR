@@ -116,7 +116,7 @@ namespace FSHook {
             int InFlagsAndAttributes,
             IntPtr InTemplateFile);
 
-        static IntPtr CreateFile_Hook(
+        IntPtr CreateFile_Hook(
             string InFileName,
             int InDesiredAccess,
             int InShareMode,
@@ -125,20 +125,21 @@ namespace FSHook {
             int InFlagsAndAttributes,
             IntPtr InTemplateFile)
         {
-            
+
             try
             {
-                Main This = (Main)HookRuntimeInfo.Callback;
-
-                lock (This.Queue)
+                lock (this._messageQueue)
                 {
-                    This.Queue.Push("[" + RemoteHooking.GetCurrentProcessId() + ":" + 
-                        RemoteHooking.GetCurrentThreadId() +  "]: \"" + InFileName + "\"");
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Create {2}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), InFileName));
+                    }
                 }
             }
-            catch
-            {
-            }
+            catch { }
 
             return CreateFile(
                 InFileName,
