@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFSRegRedirector", "WinFS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegHook", "RegHook\RegHook.csproj", "{36412C58-2898-4E83-8525-387A0BDC2BEC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSHook", "FSHook\FSHook.csproj", "{CCB51DE7-7141-4091-949C-558CB373FB75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{36412C58-2898-4E83-8525-387A0BDC2BEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36412C58-2898-4E83-8525-387A0BDC2BEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36412C58-2898-4E83-8525-387A0BDC2BEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCB51DE7-7141-4091-949C-558CB373FB75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCB51DE7-7141-4091-949C-558CB373FB75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCB51DE7-7141-4091-949C-558CB373FB75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCB51DE7-7141-4091-949C-558CB373FB75}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
