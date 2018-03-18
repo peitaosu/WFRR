@@ -1,5 +1,5 @@
 # Windows File/Registry Redirection
-[![GitHub license](https://img.shields.io/github/license/peitaosu/Win-Reg-Redirect.svg)](https://github.com/peitaosu/Win-Reg-Redirect/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/peitaosu/Win-FS-Reg-Redirect.svg)](https://github.com/peitaosu/Win-FS-Reg-Redirect/blob/master/LICENSE)
 
 This project is supposed to redirect all registry calls of process to virtual file system/registry.
 
