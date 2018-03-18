@@ -56,6 +56,12 @@
       <Name>RegHook</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="FSHook\FSHook.csproj">
+      <Project>{ccb51de7-7141-4091-949c-558cb373fb75}</Project>
+      <Name>FSHook</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
