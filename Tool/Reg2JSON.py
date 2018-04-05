@@ -32,7 +32,7 @@ def convert_reg_str_to_json(reg_str_list):
             value_name = reg_str.split('=')[0].strip('"')
             if value_name == '@':
                 value_name = '(Default)'
-            value_content = reg_str.split('=')[1]
+            value_content = '='.join(reg_str.split('=')[1:])
             if value_content.startswith('"'):
                 value_type = "REG_SZ"
                 value_data = value_content.strip('"')
