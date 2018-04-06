@@ -56,7 +56,7 @@ def convert_reg_str_to_json(reg_str_list):
 
 def save_json_str_to_file(reg_dict, json_file_path):
     with open(json_file_path, 'w') as json_file:
-        json.dump(reg_dict, json_file)
+        json.dump(reg_dict, json_file, indent=4)
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
