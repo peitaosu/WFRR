@@ -66,8 +66,15 @@ namespace FSHook {
                 new CreateFileW_Delegate(CreateFile_Hook),
                 this);
 
+            var fsDeleteFileHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "DeleteFileW"),
+                new DeleteFileW_Delegate(DeleteFile_Hook),
+                this);
+
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -91,6 +98,7 @@ namespace FSHook {
             } catch { }
 
             fsCreateFileHook.Dispose();
+            fsDeleteFileHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
 
@@ -153,6 +161,40 @@ namespace FSHook {
 
         #endregion
 
+        #region DeleteFileW Hook
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr DeleteFileW_Delegate(
+            string lpFileName);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        static extern IntPtr DeleteFile(
+            string lpFileName);
+
+        IntPtr DeleteFile_Hook(
+            string lpFileName)
+        {
+
+            try
+            {
+                lock (this._messageQueue)
+                {
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Delete {2}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpFileName));
+                    }
+                }
+            }
+            catch { }
+
+            return DeleteFile(
+                lpFileName);
+        }
+
+        #endregion
     }
 
 }
