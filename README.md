@@ -48,9 +48,38 @@ This project is supposed to redirect all registry calls of process to virtual fi
 }
 ```
 
+## V_FS.json Sample
+* Dirs: please use the directory name with lower case.
+* Files: list all files with name.
+```
+{
+    "Dirs": {
+        "dir_1": {
+            "Dirs": {
+                "dir_2":{
+                    "Dirs": {
+                        "dir_3": {
+                            "Dirs": {},
+                            "Files": []
+                        }
+                    },
+                    "Files": []
+                }
+            },
+            "Files": [
+                {
+                    "Name": "file_1"
+                }
+            ]
+        }
+    }
+}
+```
+
+
 ## Usage
 
-Please put `V_REG.json` in the same location as WinFSRegRedirector.exe.
+Please put `V_REG.json` and `V_FS.json` in the same location as WinFSRegRedirector.exe.
 
 ```
 WinFSRegRedirector.exe ProcessID
