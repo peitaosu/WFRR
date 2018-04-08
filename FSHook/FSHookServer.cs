@@ -71,10 +71,17 @@ namespace FSHook {
                 new DeleteFileW_Delegate(DeleteFile_Hook),
                 this);
 
+            var fsReadFileHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "ReadFileEx"),
+                new ReadFileEx_Delegate(ReadFileEx_Hook),
+                this);
+
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            fsReadFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "ReadFileEx hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -99,6 +106,7 @@ namespace FSHook {
 
             fsCreateFileHook.Dispose();
             fsDeleteFileHook.Dispose();
+            fsReadFileHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
 
@@ -159,6 +167,56 @@ namespace FSHook {
                 InTemplateFile);
         }
 
+        #endregion
+
+        #region ReadFileEx Hook
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate bool ReadFileEx_Delegate(
+            IntPtr hFile,
+            [Out] byte[] lpBuffer,
+            uint nNumberOfBytesToRead,
+            [In] ref System.Threading.NativeOverlapped lpOverlapped,
+            System.Threading.IOCompletionCallback lpCompletionRoutine);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        static extern bool ReadFileEx(
+            IntPtr hFile,
+            [Out] byte[] lpBuffer,
+            uint nNumberOfBytesToRead, 
+            [In] ref System.Threading.NativeOverlapped lpOverlapped,
+            System.Threading.IOCompletionCallback lpCompletionRoutine);
+
+        bool ReadFileEx_Hook(
+            IntPtr hFile,
+            [Out] byte[] lpBuffer,
+            uint nNumberOfBytesToRead,
+            [In] ref System.Threading.NativeOverlapped lpOverlapped,
+            System.Threading.IOCompletionCallback lpCompletionRoutine)
+        {
+            try
+            {
+                lock (this._messageQueue)
+                {
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Read {2}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hFile));
+                    }
+                }
+            }
+            catch { }
+
+            return ReadFileEx(
+                hFile,
+                lpBuffer,
+                nNumberOfBytesToRead,
+                ref lpOverlapped,
+                lpCompletionRoutine);
+
+        }
         #endregion
 
         #region DeleteFileW Hook
