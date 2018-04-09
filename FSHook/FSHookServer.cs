@@ -76,12 +76,19 @@ namespace FSHook {
                 new ReadFileEx_Delegate(ReadFileEx_Hook),
                 this);
 
+            var fsGetFileSizeHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "GetFileSizeEx"),
+                new GetFileSizeEx_Delegate(GetFileSize_Hook),
+                this);
+
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsReadFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            fsGetFileSizeHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "ReadFileEx hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileSizeEx hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -107,6 +114,7 @@ namespace FSHook {
             fsCreateFileHook.Dispose();
             fsDeleteFileHook.Dispose();
             fsReadFileHook.Dispose();
+            fsGetFileSizeHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
 
@@ -217,6 +225,45 @@ namespace FSHook {
                 lpCompletionRoutine);
 
         }
+        #endregion
+
+        #region GetFileSizeEx Hook
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate bool GetFileSizeEx_Delegate(
+            IntPtr hFile,
+            out long lpFileSize);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        static extern bool GetFileSize(
+            IntPtr hFile,
+            out long lpFileSize);
+
+        bool GetFileSize_Hook(
+            IntPtr hFile,
+            out long lpFileSize)
+        {
+
+            try
+            {
+                lock (this._messageQueue)
+                {
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Get Size {2}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hFile));
+                    }
+                }
+            }
+            catch { }
+
+            return GetFileSize(
+                hFile,
+                out lpFileSize);
+        }
+
         #endregion
 
         #region DeleteFileW Hook
