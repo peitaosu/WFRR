@@ -8,12 +8,13 @@ namespace WinFSRegRedirector {
             Int32 targetPID = 0;
             string targetExe = null;
             string targetArg = "";
+            string inject = "all";
 
             // Will contain the name of the IPC server channel
             string channelName = null;
 
             // Process command line arguments or print instructions and retrieve argument value
-            ProcessArgs (args, out targetPID, out targetExe, out targetArg);
+            ProcessArgs (args, out targetPID, out targetExe, out targetArg, out inject);
 
             if (targetPID <= 0 && string.IsNullOrEmpty (targetExe))
                 return;
@@ -34,50 +35,61 @@ namespace WinFSRegRedirector {
                 if (targetPID > 0) {
                     Console.WriteLine ("Attempting to inject into process {0}", targetPID);
 
-                    // inject into existing process
-                    EasyHook.RemoteHooking.Inject(
-                        targetPID, // ID of process to inject into
-                        injectionRegLibrary, // 32-bit library to inject (if target is 32-bit)
-                        injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
-                        channelName // the parameters to pass into injected library
-                                    // ...
-                    );
-                    // inject into existing process
-                    EasyHook.RemoteHooking.Inject(
-                        targetPID, // ID of process to inject into
-                        injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
-                        injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
-                        channelName // the parameters to pass into injected library
-                                    // ...
-                    );
+                    if (inject == "all" || inject == "reg"){
+                        // inject into existing process
+                        EasyHook.RemoteHooking.Inject(
+                            targetPID, // ID of process to inject into
+                            injectionRegLibrary, // 32-bit library to inject (if target is 32-bit)
+                            injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
+                            channelName // the parameters to pass into injected library
+                                        // ...
+                        );
+                    }
+
+                    if (inject == "all" || inject == "file"){
+                        // inject into existing process
+                        EasyHook.RemoteHooking.Inject(
+                            targetPID, // ID of process to inject into
+                            injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
+                            injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
+                            channelName // the parameters to pass into injected library
+                                        // ...
+                        );
+                    }
                 }
                 // Create a new process and then inject into it
                 else if (!string.IsNullOrEmpty (targetExe)) {
                     Console.WriteLine ("Attempting to create and inject into {0}", targetExe);
-                    // start and inject into a new process
-                    EasyHook.RemoteHooking.CreateAndInject(
-                        targetExe, // executable to run
-                        targetArg, // command line arguments for target
-                        0, // additional process creation flags to pass to CreateProcess
-                        EasyHook.InjectionOptions.DoNotRequireStrongName, // allow injectionLibrary to be unsigned
-                        injectionRegLibrary, // 32-bit library to inject (if target is 32-bit)
-                        injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
-                        out targetPID, // retrieve the newly created process ID
-                        channelName // the parameters to pass into injected library
-                                    // ...
-                    );
-                    // start and inject into a new process
-                    EasyHook.RemoteHooking.CreateAndInject(
-                        targetExe, // executable to run
-                        targetArg, // command line arguments for target
-                        0, // additional process creation flags to pass to CreateProcess
-                        EasyHook.InjectionOptions.DoNotRequireStrongName, // allow injectionLibrary to be unsigned
-                        injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
-                        injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
-                        out targetPID, // retrieve the newly created process ID
-                        channelName // the parameters to pass into injected library
-                                    // ...
-                    );
+
+                    if (inject == "all" || inject == "reg"){
+                        // start and inject into a new process
+                        EasyHook.RemoteHooking.CreateAndInject(
+                            targetExe, // executable to run
+                            targetArg, // command line arguments for target
+                            0, // additional process creation flags to pass to CreateProcess
+                            EasyHook.InjectionOptions.DoNotRequireStrongName, // allow injectionLibrary to be unsigned
+                            injectionRegLibrary, // 32-bit library to inject (if target is 32-bit)
+                            injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
+                            out targetPID, // retrieve the newly created process ID
+                            channelName // the parameters to pass into injected library
+                                        // ...
+                        );
+                    }
+
+                    if (inject == "all" || inject == "file"){
+                        // start and inject into a new process
+                        EasyHook.RemoteHooking.CreateAndInject(
+                            targetExe, // executable to run
+                            targetArg, // command line arguments for target
+                            0, // additional process creation flags to pass to CreateProcess
+                            EasyHook.InjectionOptions.DoNotRequireStrongName, // allow injectionLibrary to be unsigned
+                            injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
+                            injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
+                            out targetPID, // retrieve the newly created process ID
+                            channelName // the parameters to pass into injected library
+                                        // ...
+                        );
+                    }
                 }
             } catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -92,13 +104,19 @@ namespace WinFSRegRedirector {
             Console.ReadKey ();
         }
 
-        static void ProcessArgs (string[] args, out int targetPID, out string targetExe, out string targetArg) {
+        static void ProcessArgs (string[] args, out int targetPID, out string targetExe, out string targetArg, out string inject) {
             targetPID = 0;
             targetExe = null;
             targetArg = "";
+            inject = "all";
 
             // Load any parameters
             while ((args.Length == 0) || !Int32.TryParse (args[0], out targetPID) || !File.Exists (args[0])) {
+                if (args.Length > 1){
+                    if (args[1] == "all" || args[1] == "file" || args[1] == "reg"){
+                        inject = args[1];
+                    }
+                }
                 if (targetPID > 0) {
                     break;
                 }
@@ -129,9 +147,9 @@ namespace WinFSRegRedirector {
                             break;
                         }
                     }
-                    Console.WriteLine ("Usage: WinFSRegRedirector ProcessID");
-                    Console.WriteLine ("   or: WinFSRegRedirector ProcessName.exe");
-                    Console.WriteLine ("   or: WinFSRegRedirector PathToExecutable");
+                    Console.WriteLine ("Usage: WinFSRegRedirector ProcessID [all\\file\\reg]");
+                    Console.WriteLine ("   or: WinFSRegRedirector ProcessName.exe [all\\file\\reg]");
+                    Console.WriteLine ("   or: WinFSRegRedirector PathToExecutable [all\\file\\reg]");
                     Console.Write ("> ");
 
                     args = new string[] { Console.ReadLine () };
