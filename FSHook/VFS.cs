@@ -17,6 +17,6 @@ namespace FSHook
     public class VFile
     {
         public string Name { set; get; }
-        public string Size { set; get; }
+        public int Size { set; get; }
     }
 }

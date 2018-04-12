@@ -69,7 +69,7 @@ This project is supposed to redirect all registry calls of process to virtual fi
             "Files": [
                 {
                     "Name": "file_1",
-                    "Size": "1234"
+                    "Size": 1234
                 }
             ]
         }
