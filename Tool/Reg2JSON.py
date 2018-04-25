@@ -1,9 +1,13 @@
 import os, sys, json
 
 def get_reg_str_list(reg_file_path):
-    with open(reg_file_path) as reg_file:
-        # suppose the input file using utf-16 because it's default encoding of regedit exported file
-        reg = reg_file.read().decode('utf-16').replace('\\\r\n  ', '').split('\r\n')
+    # suppose the input file using utf-16 because it's default encoding of regedit exported file
+    try:
+        with open(reg_file_path) as reg_file:    
+            reg = reg_file.read().decode('utf-16').replace('\\\r\n  ', '').split('\r\n')
+    except:
+        with open(reg_file_path, encoding='utf-16') as reg_file:
+            reg = reg_file.read().replace('\\\r\n  ', '').split('\r\n')
     return filter(None, reg)
 
 def convert_reg_str_to_json(reg_str_list):
@@ -60,7 +64,7 @@ def save_json_str_to_file(reg_dict, json_file_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print 'Usage: python Reg2JSON.py in.reg out.json'
+        print('Usage: python Reg2JSON.py in.reg out.json')
     else:
         reg = get_reg_str_list(sys.argv[1])
         reg_dict = convert_reg_str_to_json(reg)
