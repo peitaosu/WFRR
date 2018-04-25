@@ -4,9 +4,12 @@
 This project is supposed to redirect all registry calls of process to virtual file system/registry.
 
 ## Requirements
-- WinFSRegRedirector.exe - use NuGet Package Manager to install these dependencies for project
+- WinFSRegRedirector.exe
    * EasyHook 
    * Newtonsoft.Json
+   ```
+   nuget restore WinFSRegRedirector.sln
+   ```
 - Reg2JSON.py
    * python 2.x
 
