@@ -11,19 +11,20 @@ namespace WinFSRegRedirector {
             string inject = "all";
 
             // Will contain the name of the IPC server channel
-            string channelName = null;
+            string regChannelName = null;
+            string fsChannelName = null;
 
             // Process command line arguments or print instructions and retrieve argument value
-            ProcessArgs (args, out targetPID, out targetExe, out targetArg, out inject);
+            ProcessArgs(args, out targetPID, out targetExe, out targetArg, out inject);
 
             if (targetPID <= 0 && string.IsNullOrEmpty (targetExe))
                 return;
 
             // Create the IPC server using the RegHook.ServiceInterface class as a singleton
-            EasyHook.RemoteHooking.IpcCreateServer<RegHook.ServerInterface>(ref channelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
+            EasyHook.RemoteHooking.IpcCreateServer<RegHook.ServerInterface>(ref regChannelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
 
             // Create the IPC server using the FSHook.ServiceInterface class as a singleton
-            EasyHook.RemoteHooking.IpcCreateServer<FSHook.ServerInterface>(ref channelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
+            EasyHook.RemoteHooking.IpcCreateServer<FSHook.ServerInterface>(ref fsChannelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
 
             // Get the full path to the assembly we want to inject into the target process
             string injectionRegLibrary = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "RegHook.dll");
@@ -41,8 +42,8 @@ namespace WinFSRegRedirector {
                             targetPID, // ID of process to inject into
                             injectionRegLibrary, // 32-bit library to inject (if target is 32-bit)
                             injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
-                            channelName // the parameters to pass into injected library
-                                        // ...
+                            regChannelName // the parameters to pass into injected library
+                                           // ...
                         );
                     }
 
@@ -52,8 +53,8 @@ namespace WinFSRegRedirector {
                             targetPID, // ID of process to inject into
                             injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
                             injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
-                            channelName // the parameters to pass into injected library
-                                        // ...
+                            fsChannelName // the parameters to pass into injected library
+                                          // ...
                         );
                     }
                 }
@@ -71,7 +72,7 @@ namespace WinFSRegRedirector {
                             injectionRegLibrary, // 32-bit library to inject (if target is 32-bit)
                             injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
                             out targetPID, // retrieve the newly created process ID
-                            channelName // the parameters to pass into injected library
+                            regChannelName // the parameters to pass into injected library
                                         // ...
                         );
                     }
@@ -86,7 +87,7 @@ namespace WinFSRegRedirector {
                             injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
                             injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
                             out targetPID, // retrieve the newly created process ID
-                            channelName // the parameters to pass into injected library
+                            fsChannelName // the parameters to pass into injected library
                                         // ...
                         );
                     }
