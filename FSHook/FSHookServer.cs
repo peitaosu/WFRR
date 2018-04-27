@@ -81,14 +81,21 @@ namespace FSHook {
                 new GetFileSizeEx_Delegate(GetFileSize_Hook),
                 this);
 
+            var fsCopyFileHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileEx"),
+                new CopyFileEx_Delegate(CopyFile_Hook),
+                this);
+
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsReadFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsGetFileSizeHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "ReadFileEx hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileSizeEx hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileEx hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -115,6 +122,7 @@ namespace FSHook {
             fsDeleteFileHook.Dispose();
             fsReadFileHook.Dispose();
             fsGetFileSizeHook.Dispose();
+            fsCopyFileHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
 
@@ -297,6 +305,95 @@ namespace FSHook {
 
             return DeleteFile(
                 lpFileName);
+        }
+
+        #endregion
+
+        #region CopyFileEx Hook
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate bool CopyFileEx_Delegate(
+            string lpExistingFileName,
+            string lpNewFileName,
+            CopyProgressRoutine lpProgressRoutine,
+            IntPtr lpData,
+            ref Int32 pbCancel,
+            CopyFileFlags dwCopyFlags);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        static extern bool CopyFileEx(
+            string lpExistingFileName,
+            string lpNewFileName,
+            CopyProgressRoutine lpProgressRoutine,
+            IntPtr lpData,
+            ref Int32 pbCancel,
+            CopyFileFlags dwCopyFlags);
+
+        delegate CopyProgressResult CopyProgressRoutine(
+            long TotalFileSize,
+            long TotalBytesTransferred,
+            long StreamSize,
+            long StreamBytesTransferred,
+            uint dwStreamNumber,
+            CopyProgressCallbackReason dwCallbackReason,
+            IntPtr hSourceFile,
+            IntPtr hDestinationFile,
+            IntPtr lpData);
+
+        enum CopyProgressResult : uint
+        {
+            PROGRESS_CONTINUE = 0,
+            PROGRESS_CANCEL = 1,
+            PROGRESS_STOP = 2,
+            PROGRESS_QUIET = 3
+        }
+
+        enum CopyProgressCallbackReason : uint
+        {
+            CALLBACK_CHUNK_FINISHED = 0x00000000,
+            CALLBACK_STREAM_SWITCH = 0x00000001
+        }
+
+        [Flags]
+        enum CopyFileFlags : uint
+        {
+            COPY_FILE_FAIL_IF_EXISTS = 0x00000001,
+            COPY_FILE_RESTARTABLE = 0x00000002,
+            COPY_FILE_OPEN_SOURCE_FOR_WRITE = 0x00000004,
+            COPY_FILE_ALLOW_DECRYPTED_DESTINATION = 0x00000008
+        }
+
+        bool CopyFile_Hook(
+            string lpExistingFileName,
+            string lpNewFileName,
+            CopyProgressRoutine lpProgressRoutine,
+            IntPtr lpData,
+            ref Int32 pbCancel,
+            CopyFileFlags dwCopyFlags)
+        {
+
+            try
+            {
+                lock (this._messageQueue)
+                {
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Copy {2} {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpExistingFileName, lpNewFileName));
+                    }
+                }
+            }
+            catch { }
+
+            return CopyFileEx(
+                lpExistingFileName,
+                lpNewFileName,
+                lpProgressRoutine,
+                lpData,
+                ref pbCancel,
+                dwCopyFlags);
         }
 
         #endregion
