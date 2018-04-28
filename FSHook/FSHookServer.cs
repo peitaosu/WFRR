@@ -81,6 +81,11 @@ namespace FSHook {
                 new GetFileSizeEx_Delegate(GetFileSize_Hook),
                 this);
 
+            var fsGetFileTimeHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "GetFileTime"),
+                new GetFileTime_Delegate(GetFileTime_Hook),
+                this);
+
             var fsCopyFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileEx"),
                 new CopyFileEx_Delegate(CopyFile_Hook),
@@ -90,11 +95,13 @@ namespace FSHook {
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsReadFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsGetFileSizeHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            fsGetFileTimeHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "ReadFileEx hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileSizeEx hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileTime hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileEx hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
@@ -122,6 +129,7 @@ namespace FSHook {
             fsDeleteFileHook.Dispose();
             fsReadFileHook.Dispose();
             fsGetFileSizeHook.Dispose();
+            fsGetFileTimeHook.Dispose();
             fsCopyFileHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
@@ -270,6 +278,52 @@ namespace FSHook {
             return GetFileSize(
                 hFile,
                 out lpFileSize);
+        }
+
+        #endregion
+
+        #region GetFileTime Hook
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate bool GetFileTime_Delegate(
+            IntPtr hFile,
+            IntPtr lpCreationTime,
+            IntPtr lpLastAccessTime,
+            IntPtr lpLastWriteTime);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
+        static extern bool GetFileTime(
+            IntPtr hFile,
+            IntPtr lpCreationTime,
+            IntPtr lpLastAccessTime,
+            IntPtr lpLastWriteTime);
+
+        bool GetFileTime_Hook(
+            IntPtr hFile,
+            IntPtr lpCreationTime,
+            IntPtr lpLastAccessTime,
+            IntPtr lpLastWriteTime)
+        {
+
+            try
+            {
+                lock (this._messageQueue)
+                {
+                    if (this._messageQueue.Count < 1000)
+                    {
+
+                        this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Get Time {2} {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hFile, lpLastWriteTime));
+                    }
+                }
+            }
+            catch { }
+
+            return GetFileTime(
+                hFile,
+                lpCreationTime,
+                lpLastAccessTime,
+                lpLastWriteTime);
         }
 
         #endregion

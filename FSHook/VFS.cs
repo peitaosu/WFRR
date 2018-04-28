@@ -18,5 +18,6 @@ namespace FSHook
     {
         public string Name { set; get; }
         public int Size { set; get; }
+        public string Time { set; get; }
     }
 }
