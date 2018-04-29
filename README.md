@@ -56,27 +56,16 @@ This project is supposed to redirect all registry calls of process to virtual fi
 * Files: list all files with name.
 ```
 {
-    "Dirs": {
-        "dir_1": {
-            "Dirs": {
-                "dir_2":{
-                    "Dirs": {
-                        "dir_3": {
-                            "Dirs": {},
-                            "Files": []
-                        }
-                    },
-                    "Files": []
-                }
-            },
-            "Files": [
-                {
-                    "Name": "file_1",
-                    "Size": 1234
-                }
-            ]
+    "Mapping": [
+        {
+            "Source": "",
+            "Destination": ""
+        },
+        {
+            "Source": "",
+            "Destination": ""
         }
-    }
+    ]
 }
 ```
 
