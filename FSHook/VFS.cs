@@ -6,18 +6,16 @@ using System.Threading.Tasks;
 
 namespace FSHook
 {
-    //virtual directory
-    public class VDirectory
+    //virtual file system
+    public class VFS
     {
-        public Dictionary<string, VDirectory> Dirs { set; get; }
-        public List<VFile> Files { set; get; }
+        public List<VFSMapping> Mapping { set; get; }
     }
 
-    //virtual file
-    public class VFile
+    //virtual file system mapping
+    public class VFSMapping
     {
-        public string Name { set; get; }
-        public int Size { set; get; }
-        public string Time { set; get; }
+        public string Source { set; get; }
+        public string Destination { set; get; }
     }
 }
