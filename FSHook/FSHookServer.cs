@@ -85,12 +85,12 @@ namespace FSHook {
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "GetFileTime"),
                 new GetFileTime_Delegate(GetFileTime_Hook),
                 this);
-
+            
             var fsCopyFileHook = EasyHook.LocalHook.Create(
-                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileEx"),
-                new CopyFileEx_Delegate(CopyFile_Hook),
+                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileW"),
+                new CopyFileW_Delegate(CopyFile_Hook),
                 this);
-
+                
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsReadFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
@@ -366,64 +366,21 @@ namespace FSHook {
         #region CopyFileEx Hook
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool CopyFileEx_Delegate(
+        delegate bool CopyFileW_Delegate(
             string lpExistingFileName,
             string lpNewFileName,
-            CopyProgressRoutine lpProgressRoutine,
-            IntPtr lpData,
-            ref Int32 pbCancel,
-            CopyFileFlags dwCopyFlags);
+            bool bFailIfExists);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
         static extern bool CopyFileEx(
             string lpExistingFileName,
             string lpNewFileName,
-            CopyProgressRoutine lpProgressRoutine,
-            IntPtr lpData,
-            ref Int32 pbCancel,
-            CopyFileFlags dwCopyFlags);
-
-        delegate CopyProgressResult CopyProgressRoutine(
-            long TotalFileSize,
-            long TotalBytesTransferred,
-            long StreamSize,
-            long StreamBytesTransferred,
-            uint dwStreamNumber,
-            CopyProgressCallbackReason dwCallbackReason,
-            IntPtr hSourceFile,
-            IntPtr hDestinationFile,
-            IntPtr lpData);
-
-        enum CopyProgressResult : uint
-        {
-            PROGRESS_CONTINUE = 0,
-            PROGRESS_CANCEL = 1,
-            PROGRESS_STOP = 2,
-            PROGRESS_QUIET = 3
-        }
-
-        enum CopyProgressCallbackReason : uint
-        {
-            CALLBACK_CHUNK_FINISHED = 0x00000000,
-            CALLBACK_STREAM_SWITCH = 0x00000001
-        }
-
-        [Flags]
-        enum CopyFileFlags : uint
-        {
-            COPY_FILE_FAIL_IF_EXISTS = 0x00000001,
-            COPY_FILE_RESTARTABLE = 0x00000002,
-            COPY_FILE_OPEN_SOURCE_FOR_WRITE = 0x00000004,
-            COPY_FILE_ALLOW_DECRYPTED_DESTINATION = 0x00000008
-        }
+            bool bFailIfExists);
 
         bool CopyFile_Hook(
             string lpExistingFileName,
             string lpNewFileName,
-            CopyProgressRoutine lpProgressRoutine,
-            IntPtr lpData,
-            ref Int32 pbCancel,
-            CopyFileFlags dwCopyFlags)
+            bool bFailIfExists)
         {
 
             try
@@ -444,10 +401,7 @@ namespace FSHook {
             return CopyFileEx(
                 lpExistingFileName,
                 lpNewFileName,
-                lpProgressRoutine,
-                lpData,
-                ref pbCancel,
-                dwCopyFlags);
+                bFailIfExists);
         }
 
         #endregion
