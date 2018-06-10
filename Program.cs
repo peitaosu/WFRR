@@ -32,11 +32,13 @@ namespace WinFSRegRedirector {
 
             try
             {
-                // Injecting into existing process by Id
-                if (targetPID > 0) {
-                    Console.WriteLine ("Attempting to inject into process {0}", targetPID);
+                if (inject == "all" || inject == "reg")
+                {
+                    if (targetPID > 0)
+                    {
+                        // Injecting into existing process by Id
+                        Console.WriteLine("Attempting to inject into process {0}", targetPID);
 
-                    if (inject == "all" || inject == "reg"){
                         // inject into existing process
                         EasyHook.RemoteHooking.Inject(
                             targetPID, // ID of process to inject into
@@ -46,23 +48,11 @@ namespace WinFSRegRedirector {
                                            // ...
                         );
                     }
+                    else if (!string.IsNullOrEmpty(targetExe))
+                    {
+                        // Create a new process and then inject into it
+                        Console.WriteLine("Attempting to create and inject into {0}", targetExe);
 
-                    if (inject == "all" || inject == "file"){
-                        // inject into existing process
-                        EasyHook.RemoteHooking.Inject(
-                            targetPID, // ID of process to inject into
-                            injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
-                            injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
-                            fsChannelName // the parameters to pass into injected library
-                                          // ...
-                        );
-                    }
-                }
-                // Create a new process and then inject into it
-                else if (!string.IsNullOrEmpty (targetExe)) {
-                    Console.WriteLine ("Attempting to create and inject into {0}", targetExe);
-
-                    if (inject == "all" || inject == "reg"){
                         // start and inject into a new process
                         EasyHook.RemoteHooking.CreateAndInject(
                             targetExe, // executable to run
@@ -73,11 +63,31 @@ namespace WinFSRegRedirector {
                             injectionRegLibrary, // 64-bit library to inject (if target is 64-bit)
                             out targetPID, // retrieve the newly created process ID
                             regChannelName // the parameters to pass into injected library
-                                        // ...
+                                           // ...
                         );
                     }
+                }
 
-                    if (inject == "all" || inject == "file"){
+                if (inject == "all" || inject == "file"){
+                    if (targetPID > 0)
+                    {
+                        // Injecting into existing process by Id
+                        Console.WriteLine("Attempting to inject into process {0}", targetPID);
+
+                        // inject into existing process
+                        EasyHook.RemoteHooking.Inject(
+                            targetPID, // ID of process to inject into
+                            injectionFSLibrary, // 32-bit library to inject (if target is 32-bit)
+                            injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
+                            fsChannelName // the parameters to pass into injected library
+                                          // ...
+                        );
+                    }
+                    else if (!string.IsNullOrEmpty(targetExe))
+                    {
+                        // Create a new process and then inject into it
+                        Console.WriteLine("Attempting to create and inject into {0}", targetExe);
+
                         // start and inject into a new process
                         EasyHook.RemoteHooking.CreateAndInject(
                             targetExe, // executable to run
@@ -88,7 +98,7 @@ namespace WinFSRegRedirector {
                             injectionFSLibrary, // 64-bit library to inject (if target is 64-bit)
                             out targetPID, // retrieve the newly created process ID
                             fsChannelName // the parameters to pass into injected library
-                                        // ...
+                                          // ...
                         );
                     }
                 }
