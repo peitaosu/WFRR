@@ -39,7 +39,7 @@ namespace FSHook {
 
         string vfs_path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "V_FS.json");
         string vfs_json = null;
-        VDirectory _vfs = null;
+        VFS _vfs = null;
 
         public InjectionEntryPoint (
             EasyHook.RemoteHooking.IContext context,
@@ -56,7 +56,7 @@ namespace FSHook {
 
             try {
                 vfs_json = new StreamReader (vfs_path).ReadToEnd ();
-                _vfs = JsonConvert.DeserializeObject<VDirectory> (vfs_json);
+                _vfs = JsonConvert.DeserializeObject<VFS> (vfs_json);
             } catch (Exception e) {
                 _server.ReportException (e);
             }
