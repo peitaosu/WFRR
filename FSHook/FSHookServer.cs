@@ -398,6 +398,23 @@ namespace FSHook {
             string lpNewFileName,
             bool bFailIfExists)
         {
+            foreach (VFSMapping map in _vfs.Mapping)
+            {
+                if (lpExistingFileName.Contains(map.Source))
+                {
+                    lpExistingFileName = lpExistingFileName.Replace(map.Source, map.Destination);
+                    break;
+                }
+            }
+            foreach (VFSMapping map in _vfs.Mapping)
+            {
+                if (lpNewFileName.Contains(map.Source))
+                {
+                    lpNewFileName = lpNewFileName.Replace(map.Source, map.Destination);
+                    break;
+                }
+
+            }
 
             try
             {
