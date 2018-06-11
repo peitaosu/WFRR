@@ -166,6 +166,14 @@ namespace FSHook {
             IntPtr InTemplateFile)
         {
 
+            foreach (VFSMapping map in _vfs.Mapping)
+            {
+                if (InFileName.Contains(map.Source))
+                {
+                    InFileName = InFileName.Replace(map.Source, map.Destination);
+                    break;
+                }
+            }
             try
             {
                 lock (this._messageQueue)
