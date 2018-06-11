@@ -350,6 +350,14 @@ namespace FSHook {
             string lpFileName)
         {
 
+            foreach (VFSMapping map in _vfs.Mapping)
+            {
+                if (lpFileName.Contains(map.Source))
+                {
+                    lpFileName = lpFileName.Replace(map.Source, map.Destination);
+                    break;
+                }
+            }
             try
             {
                 lock (this._messageQueue)
