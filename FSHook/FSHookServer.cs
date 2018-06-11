@@ -102,7 +102,7 @@ namespace FSHook {
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "ReadFileEx hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileSizeEx hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileTime hook installed");
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileEx hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
@@ -363,7 +363,7 @@ namespace FSHook {
 
         #endregion
 
-        #region CopyFileEx Hook
+        #region CopyFileW Hook
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate bool CopyFileW_Delegate(
@@ -372,7 +372,7 @@ namespace FSHook {
             bool bFailIfExists);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern bool CopyFileEx(
+        static extern bool CopyFileW(
             string lpExistingFileName,
             string lpNewFileName,
             bool bFailIfExists);
@@ -398,7 +398,7 @@ namespace FSHook {
             }
             catch { }
 
-            return CopyFileEx(
+            return CopyFileW(
                 lpExistingFileName,
                 lpNewFileName,
                 bFailIfExists);
