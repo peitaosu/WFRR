@@ -52,8 +52,8 @@ This project is supposed to redirect all registry calls of process to virtual fi
 ```
 
 ## V_FS.json Sample
-* Dirs: please use the directory name with lower case.
-* Files: list all files with name.
+* Source: source directory path.
+* Destination: target directory path which you want to redirect to.
 ```
 {
     "Mapping": [
