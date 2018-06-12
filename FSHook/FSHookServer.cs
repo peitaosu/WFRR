@@ -71,21 +71,6 @@ namespace FSHook {
                 new DeleteFileW_Delegate(DeleteFile_Hook),
                 this);
 
-            var fsReadFileHook = EasyHook.LocalHook.Create(
-                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "ReadFileEx"),
-                new ReadFileEx_Delegate(ReadFileEx_Hook),
-                this);
-
-            var fsGetFileSizeHook = EasyHook.LocalHook.Create(
-                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "GetFileSizeEx"),
-                new GetFileSizeEx_Delegate(GetFileSize_Hook),
-                this);
-
-            var fsGetFileTimeHook = EasyHook.LocalHook.Create(
-                EasyHook.LocalHook.GetProcAddress("kernel32.dll", "GetFileTime"),
-                new GetFileTime_Delegate(GetFileTime_Hook),
-                this);
-            
             var fsCopyFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileW"),
                 new CopyFileW_Delegate(CopyFile_Hook),
@@ -93,15 +78,9 @@ namespace FSHook {
                 
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            fsReadFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            fsGetFileSizeHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            fsGetFileTimeHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "ReadFileEx hook installed");
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileSizeEx hook installed");
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "GetFileTime hook installed");
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
@@ -127,9 +106,6 @@ namespace FSHook {
 
             fsCreateFileHook.Dispose();
             fsDeleteFileHook.Dispose();
-            fsReadFileHook.Dispose();
-            fsGetFileSizeHook.Dispose();
-            fsGetFileTimeHook.Dispose();
             fsCopyFileHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
