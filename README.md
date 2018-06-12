@@ -20,6 +20,9 @@ This project is supposed to redirect all registry calls of process to virtual fi
 * RegSetValue(Ex)
 * RegQueryValue(Ex)
 * RegCloseKey
+* CreateFileW
+* DeleteFileW
+* CopyFileW
 
 ## V_REG.json Sample
 * Keys: please use the key name with lower case.
