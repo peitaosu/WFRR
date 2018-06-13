@@ -146,7 +146,11 @@ namespace FSHook {
             {
                 if (InFileName.Contains(map.Source))
                 {
+                    string OriInFileName = InFileName;
                     InFileName = InFileName.Replace(map.Source, map.Destination);
+                    this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Original Path {2} has been redirected to {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), OriInFileName, InFileName));
                     break;
                 }
             }
@@ -330,7 +334,11 @@ namespace FSHook {
             {
                 if (lpFileName.Contains(map.Source))
                 {
+                    string OrilpFileName = lpFileName;
                     lpFileName = lpFileName.Replace(map.Source, map.Destination);
+                    this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Original Path {2} has been redirected to {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), OrilpFileName, lpFileName));
                     break;
                 }
             }
@@ -378,7 +386,11 @@ namespace FSHook {
             {
                 if (lpExistingFileName.Contains(map.Source))
                 {
+                    string OrilpExistingFileName = lpExistingFileName;
                     lpExistingFileName = lpExistingFileName.Replace(map.Source, map.Destination);
+                    this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Original Path {2} has been redirected to {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), OrilpExistingFileName, lpExistingFileName));
                     break;
                 }
             }
@@ -386,7 +398,11 @@ namespace FSHook {
             {
                 if (lpNewFileName.Contains(map.Source))
                 {
+                    string OrilpNewFileName = lpNewFileName;
                     lpNewFileName = lpNewFileName.Replace(map.Source, map.Destination);
+                    this._messageQueue.Enqueue(
+                            string.Format("[{0}:{1}]: Original Path {2} has been redirected to {3}",
+                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), OrilpNewFileName, lpNewFileName));
                     break;
                 }
 
