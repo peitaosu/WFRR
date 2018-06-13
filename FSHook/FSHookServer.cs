@@ -65,23 +65,22 @@ namespace FSHook {
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CreateFileW"),
                 new CreateFileW_Delegate(CreateFile_Hook),
                 this);
+            fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "File: CreateFileW hook installed");
 
             var fsDeleteFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "DeleteFileW"),
                 new DeleteFileW_Delegate(DeleteFile_Hook),
                 this);
+            fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "File: DeleteFileW hook installed");
 
             var fsCopyFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileW"),
                 new CopyFileW_Delegate(CopyFile_Hook),
                 this);
-                
-            fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "File: CopyFileW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess ();
 
