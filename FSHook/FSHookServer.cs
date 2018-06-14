@@ -63,21 +63,21 @@ namespace FSHook {
 
             var fsCreateFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CreateFileW"),
-                new CreateFileW_Delegate(CreateFile_Hook),
+                new WinAPI.CreateFileW_Delegate(CreateFile_Hook),
                 this);
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "File: CreateFileW hook installed");
 
             var fsDeleteFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "DeleteFileW"),
-                new DeleteFileW_Delegate(DeleteFile_Hook),
+                new WinAPI.DeleteFileW_Delegate(DeleteFile_Hook),
                 this);
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "File: DeleteFileW hook installed");
 
             var fsCopyFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileW"),
-                new CopyFileW_Delegate(CopyFile_Hook),
+                new WinAPI.CopyFileW_Delegate(CopyFile_Hook),
                 this);
             fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "File: CopyFileW hook installed");
@@ -108,28 +108,6 @@ namespace FSHook {
             fsCopyFileHook.Dispose();
             EasyHook.LocalHook.Release ();
         }
-
-        #region CreateFileW Hook
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr CreateFileW_Delegate(
-            string InFileName,
-            int InDesiredAccess,
-            int InShareMode,
-            IntPtr InSecurityAttributes,
-            int InCreationDisposition,
-            int InFlagsAndAttributes,
-            IntPtr InTemplateFile);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern IntPtr CreateFile(
-            string InFileName,
-            int InDesiredAccess,
-            int InShareMode,
-            IntPtr InSecurityAttributes,
-            int InCreationDisposition,
-            int InFlagsAndAttributes,
-            IntPtr InTemplateFile);
 
         IntPtr CreateFile_Hook(
             string InFileName,
@@ -168,7 +146,7 @@ namespace FSHook {
             }
             catch { }
 
-            return CreateFile(
+            return WinAPI.CreateFile(
                 InFileName,
                 InDesiredAccess,
                 InShareMode,
@@ -177,26 +155,6 @@ namespace FSHook {
                 InFlagsAndAttributes,
                 InTemplateFile);
         }
-
-        #endregion
-
-        #region ReadFileEx Hook
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool ReadFileEx_Delegate(
-            IntPtr hFile,
-            [Out] byte[] lpBuffer,
-            uint nNumberOfBytesToRead,
-            [In] ref System.Threading.NativeOverlapped lpOverlapped,
-            System.Threading.IOCompletionCallback lpCompletionRoutine);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern bool ReadFileEx(
-            IntPtr hFile,
-            [Out] byte[] lpBuffer,
-            uint nNumberOfBytesToRead, 
-            [In] ref System.Threading.NativeOverlapped lpOverlapped,
-            System.Threading.IOCompletionCallback lpCompletionRoutine);
 
         bool ReadFileEx_Hook(
             IntPtr hFile,
@@ -220,7 +178,7 @@ namespace FSHook {
             }
             catch { }
 
-            return ReadFileEx(
+            return WinAPI.ReadFileEx(
                 hFile,
                 lpBuffer,
                 nNumberOfBytesToRead,
@@ -228,19 +186,6 @@ namespace FSHook {
                 lpCompletionRoutine);
 
         }
-        #endregion
-
-        #region GetFileSizeEx Hook
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool GetFileSizeEx_Delegate(
-            IntPtr hFile,
-            out long lpFileSize);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern bool GetFileSize(
-            IntPtr hFile,
-            out long lpFileSize);
 
         bool GetFileSize_Hook(
             IntPtr hFile,
@@ -262,27 +207,10 @@ namespace FSHook {
             }
             catch { }
 
-            return GetFileSize(
+            return WinAPI.GetFileSize(
                 hFile,
                 out lpFileSize);
         }
-
-        #endregion
-
-        #region GetFileTime Hook
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool GetFileTime_Delegate(
-            IntPtr hFile,
-            IntPtr lpCreationTime,
-            IntPtr lpLastAccessTime,
-            IntPtr lpLastWriteTime);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern bool GetFileTime(
-            IntPtr hFile,
-            IntPtr lpCreationTime,
-            IntPtr lpLastAccessTime,
-            IntPtr lpLastWriteTime);
 
         bool GetFileTime_Hook(
             IntPtr hFile,
@@ -306,24 +234,12 @@ namespace FSHook {
             }
             catch { }
 
-            return GetFileTime(
+            return WinAPI.GetFileTime(
                 hFile,
                 lpCreationTime,
                 lpLastAccessTime,
                 lpLastWriteTime);
         }
-
-        #endregion
-
-        #region DeleteFileW Hook
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate IntPtr DeleteFileW_Delegate(
-            string lpFileName);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern IntPtr DeleteFile(
-            string lpFileName);
 
         IntPtr DeleteFile_Hook(
             string lpFileName)
@@ -356,25 +272,9 @@ namespace FSHook {
             }
             catch { }
 
-            return DeleteFile(
+            return WinAPI.DeleteFile(
                 lpFileName);
         }
-
-        #endregion
-
-        #region CopyFileW Hook
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        delegate bool CopyFileW_Delegate(
-            string lpExistingFileName,
-            string lpNewFileName,
-            bool bFailIfExists);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        static extern bool CopyFileW(
-            string lpExistingFileName,
-            string lpNewFileName,
-            bool bFailIfExists);
 
         bool CopyFile_Hook(
             string lpExistingFileName,
@@ -422,13 +322,12 @@ namespace FSHook {
             }
             catch { }
 
-            return CopyFileW(
+            return WinAPI.CopyFileW(
                 lpExistingFileName,
                 lpNewFileName,
                 bFailIfExists);
         }
 
-        #endregion
     }
 
 }

@@ -52,6 +52,7 @@
     <Compile Include="FSHookServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VFS.cs" />
+    <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
