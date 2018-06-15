@@ -4,6 +4,9 @@
 # Visual Studio Configuration Files
 .vs/
 
+# C# Project Profile
+*.csproj.user
+
 # Build
 bin/
 obj/
