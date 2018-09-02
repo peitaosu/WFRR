@@ -56,6 +56,7 @@ namespace RegHook {
 
             try {
                 vreg_json = new StreamReader (vreg_path).ReadToEnd ();
+                vreg_json = Environment.ExpandEnvironmentVariables(vreg_json);
                 _vreg = JsonConvert.DeserializeObject<VRegKey> (vreg_json);
             } catch (Exception e) {
                 _server.ReportException (e);
