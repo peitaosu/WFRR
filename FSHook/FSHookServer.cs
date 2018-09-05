@@ -56,7 +56,6 @@ namespace FSHook {
 
             try {
                 vfs_json = new StreamReader (vfs_path).ReadToEnd ();
-                vfs_json = Environment.ExpandEnvironmentVariables(vfs_json);
                 _vfs = JsonConvert.DeserializeObject<VFS> (vfs_json);
             } catch (Exception e) {
                 _server.ReportException (e);
