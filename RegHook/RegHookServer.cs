@@ -16,7 +16,7 @@ namespace RegHook {
 
         public void ReportMessages (int clientPID, string[] messages) {
             for (int i = 0; i < messages.Length; i++) {
-                Console.WriteLine (messages[i], clientPID);
+                Console.WriteLine (messages[i].Replace("{", "{{").Replace("}", "}}"), clientPID);
             }
         }
 
