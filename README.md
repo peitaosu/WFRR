@@ -96,3 +96,8 @@ WinFSRegRedirector.exe ProcessID
 
 # suppose the in.reg is using utf-16, if not, please change the encoding in get_reg_str_list()
 ```
+
+## How To Debug
+
+Current supported Hooks may be not covered all File System/Registry operations. You probably need to implement additional hooks to cover them.
+To know which API calls haven't be hooked, process monitor is your good friend to monitor program operations.
