@@ -9,15 +9,15 @@ namespace RegHook
     //virtual registry key
     public class VRegKey
     {
-        public Dictionary<string, VRegKey> Keys { set; get; }
-        public List<VRegValue> Values { set; get; }
+        public List<VRegKeyMapping> Mapping { set; get; }
+        //virtual registry root
+        public string VRegRedirected { set; get; }
     }
 
-    //virtual registry value
-    public class VRegValue
+    //virtual registry key mapping
+    public class VRegKeyMapping
     {
-        public string Name { set; get; }
-        public string Type { set; get; }
-        public string Data { set; get; }
+        public string Source { set; get; }
+        public string Destination { set; get; }
     }
 }
