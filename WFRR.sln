@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFSRegRedirector", "WinFSRegRedirector.csproj", "{E7B38EB9-0FE2-4721-B5FA-E85B81191D4F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFRR", "WFRR\WFRR.csproj", "{E7B38EB9-0FE2-4721-B5FA-E85B81191D4F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegHook", "RegHook\RegHook.csproj", "{36412C58-2898-4E83-8525-387A0BDC2BEC}"
 EndProject

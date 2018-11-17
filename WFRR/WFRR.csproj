@@ -7,8 +7,8 @@
     <ProjectGuid>{E7B38EB9-0FE2-4721-B5FA-E85B81191D4F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WinFSRegRedirector</RootNamespace>
-    <AssemblyName>WinFSRegRedirector</AssemblyName>
+    <RootNamespace>WFRR</RootNamespace>
+    <AssemblyName>WFRR</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -19,7 +19,9 @@
     <DebugType Condition="'$(Configuration)' == 'Debug'">full</DebugType>
     <DebugType Condition="'$(Configuration)' == 'Release'">pdbonly</DebugType>
     <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
-    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <OutputPath>..\bin\$(Platform)\$(Configuration)\</OutputPath>
+    <BaseIntermediateOutputPath>..\obj</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Platform)\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;$(DefineConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -27,7 +29,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EasyHook, Version=2.7.6684.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
-      <HintPath>packages\EasyHook.2.7.6684\lib\net40\EasyHook.dll</HintPath>
+      <HintPath>..\3rdparty\EasyHook.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -49,34 +51,34 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="RegHook\RegHook.csproj">
+    <ProjectReference Include="..\RegHook\RegHook.csproj">
       <Project>{36412c58-2898-4e83-8525-387a0bdc2bec}</Project>
       <Name>RegHook</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="FSHook\FSHook.csproj">
+    <ProjectReference Include="..\FSHook\FSHook.csproj">
       <Project>{ccb51de7-7141-4091-949c-558cb373fb75}</Project>
       <Name>FSHook</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="EasyHook32.dll">
+    <Content Include="..\3rdparty\EasyHook32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook32Svc.exe">
+    <Content Include="..\3rdparty\EasyHook32Svc.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook64.dll">
+    <Content Include="..\3rdparty\EasyHook64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyHook64Svc.exe">
+    <Content Include="..\3rdparty\EasyHook64Svc.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyLoad32.dll">
+    <Content Include="..\3rdparty\EasyLoad32.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="EasyLoad64.dll">
+    <Content Include="..\3rdparty\EasyLoad64.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
