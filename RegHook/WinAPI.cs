@@ -31,8 +31,21 @@ namespace RegHook
             string subKey,
             ref IntPtr hkResult);
 
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyEx")]
+        internal static extern IntPtr RegCreateKeyEx(
+            IntPtr hKey,
+            string subKey,
+            ref IntPtr hkResult);
+
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
         internal delegate IntPtr RegDeleteKeyEx_Delegate(
+            IntPtr hKey,
+            string subKey,
+            int samDesired,
+            int Reserved);
+
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegDeleteKeyEx")]
+        internal static extern IntPtr RegDeleteKeyEx(
             IntPtr hKey,
             string subKey,
             int samDesired,

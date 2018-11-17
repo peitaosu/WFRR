@@ -41,6 +41,8 @@ namespace RegHook {
         string vreg_json = null;
         VRegKey _vreg = null;
         IntPtr vreg_root = IntPtr.Zero;
+        string vreg_root_str = null;
+        string vreg_redirected = null;
 
         public InjectionEntryPoint (
             EasyHook.RemoteHooking.IContext context,
@@ -58,8 +60,11 @@ namespace RegHook {
             try {
                 vreg_json = new StreamReader (vreg_path).ReadToEnd ();
                 _vreg = JsonConvert.DeserializeObject<VRegKey> (vreg_json);
-                vreg_root = HKEY_StrToPtr(_vreg.VRegRedirected.Split('\\')[0]);
-            } catch (Exception e) {
+                vreg_root_str = _vreg.VRegRedirected.Split('\\')[0];
+                vreg_root = HKEY_StrToPtr(vreg_root_str);
+                vreg_redirected = _vreg.VRegRedirected.Substring(vreg_root_str.Length + 1);
+            }
+            catch (Exception e) {
                 _server.ReportException (e);
             }
 
@@ -207,16 +212,16 @@ namespace RegHook {
         {
             switch (hkey.ToString())
             {
-                case "-HKEY_CLASSES_ROOT":
-                    return new IntPtr(Convert.ToInt32("-2147483648", 16));
-                case "-HKEY_CURRENT_CONFIG":
-                    return new IntPtr(Convert.ToInt32("-2147483643", 16));
-                case "-HKEY_CURRENT_USER":
-                    return new IntPtr(Convert.ToInt32("-2147483647", 16));
-                case "-HKEY_LOCAL_MACHINE":
-                    return new IntPtr(Convert.ToInt32("-2147483646", 16));
-                case "-HKEY_USERS":
-                    return new IntPtr(Convert.ToInt32("-2147483645", 16));
+                case "HKEY_CLASSES_ROOT":
+                    return new IntPtr(-2147483648);
+                case "HKEY_CURRENT_CONFIG":
+                    return new IntPtr(-2147483643);
+                case "HKEY_CURRENT_USER":
+                    return new IntPtr(-2147483647);
+                case "HKEY_LOCAL_MACHINE":
+                    return new IntPtr(-2147483646);
+                case "HKEY_USERS":
+                    return new IntPtr(-2147483645);
                 default:
                     return IntPtr.Zero;
             }
@@ -236,7 +241,7 @@ namespace RegHook {
             {
                 if (keyToOpen.ToUpper().Contains(map.Source.ToUpper()))
                 {
-                    keyToOpen = keyToOpen.Replace(map.Source, _vreg.VRegRedirected + "\\" + map.Destination);
+                    keyToOpen = keyToOpen.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
                     break;
                 }
             }
@@ -272,14 +277,14 @@ namespace RegHook {
             {
                 if (keyToCreate.ToUpper().Contains(map.Source.ToUpper()))
                 {
-                    keyToCreate = keyToCreate.Replace(map.Source, _vreg.VRegRedirected + "\\" + map.Destination);
+                    keyToCreate = keyToCreate.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
                     break;
                 }
             }
 
             try
             {
-                // TODO
+                result = WinAPI.RegCreateKeyEx(vreg_root, keyToCreate, ref hkResult);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Create {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToCreate, result));
@@ -287,7 +292,7 @@ namespace RegHook {
             catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
-                // TODO
+                result = WinAPI.RegCreateKeyEx(hKey, subKey, ref hkResult);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Create {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hKey, subKey, result));
@@ -310,14 +315,14 @@ namespace RegHook {
             {
                 if (keyToDelete.ToUpper().Contains(map.Source.ToUpper()))
                 {
-                    keyToDelete = keyToDelete.Replace(map.Source, _vreg.VRegRedirected + "\\" + map.Destination);
+                    keyToDelete = keyToDelete.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
                     break;
                 }
             }
 
             try
             {
-                // TODO
+                result = WinAPI.RegDeleteKeyEx(vreg_root, keyToDelete, samDesired, Reserved);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToDelete, result));
@@ -325,7 +330,7 @@ namespace RegHook {
             catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
-                // TODO
+                result = WinAPI.RegDeleteKeyEx(hKey, subKey, samDesired, Reserved);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hKey, subKey, result));
