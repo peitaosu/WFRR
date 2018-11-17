@@ -12,8 +12,3 @@ bin/
 obj/
 packages/
 
-# Binaries
-*.dll
-*.lib
-*.pdb
-*.exe
