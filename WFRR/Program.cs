@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
+using NDesk.Options;
 
 namespace WFRR {
     class Program {
@@ -14,8 +16,46 @@ namespace WFRR {
             string regChannelName = null;
             string fsChannelName = null;
 
-            // Process command line arguments or print instructions and retrieve argument value
-            ProcessArgs(args, out targetPID, out targetExe, out targetArg, out inject);
+            bool isShowHelp = false;
+            var parser = new OptionSet() {
+                { "e|exe=", "the executable file to launch and inject.",
+                   v => { if (v != null) targetExe = v; } },
+                { "a|arg=", "the arguments of executable file to launch and inject.",
+                   v => { if (v != null) targetArg = v; } },
+                { "n|pname=", "the name of process want to inject.",
+                    v => { if (v != null) targetPID = FindProcessIdByName(v); } },
+                { "i|pid=", "the id of process want to inject.",
+                    v => { if (v != null) targetPID = Int32.Parse(v); } },
+                { "all", "inject file hook and registry hook.",
+                   v => { if (v != null) inject="all"; } },
+                { "file", "inject file hook only.",
+                   v => { if (v != null) inject="file"; } },
+                { "reg", "inject registry hook only.",
+                   v => { if (v != null) inject="reg"; } },
+                { "h|help",  "show help messages",
+                   v => isShowHelp = v != null },
+            };
+
+            try
+            {
+                parser.Parse(args);
+            }
+            catch (OptionException e)
+            {
+                Console.Write("WFRR: ");
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Try `WFRR.exe --help' for more information.");
+                return;
+            }
+
+            if (isShowHelp || (targetPID <= 0 && targetExe == null) )
+            {
+                Console.WriteLine("Usage: WFRR.exe [OPTIONS]");
+                Console.WriteLine();
+                Console.WriteLine("Options:");
+                parser.WriteOptionDescriptions(Console.Out);
+                return;
+            }
 
             if (targetPID <= 0 && string.IsNullOrEmpty (targetExe))
                 return;
@@ -115,60 +155,18 @@ namespace WFRR {
             Console.ReadKey ();
         }
 
-        static void ProcessArgs (string[] args, out int targetPID, out string targetExe, out string targetArg, out string inject) {
-            targetPID = 0;
-            targetExe = null;
-            targetArg = "";
-            inject = "all";
-
-            // Load any parameters
-            while ((args.Length == 0) || !Int32.TryParse (args[0], out targetPID) || !File.Exists (args[0])) {
-                if (args.Length > 1){
-                    if (args[1] == "all" || args[1] == "file" || args[1] == "reg"){
-                        inject = args[1];
-                    }
-                }
-                if (targetPID > 0) {
-                    break;
-                }
-                if (args.Length != 0 && args[0].EndsWith(".exe") && !args[0].Contains("\\"))
+        static int FindProcessIdByName(string name)
+        {
+            Console.WriteLine("Find Process: " + name);
+            while (true)
+            {
+                Process[] processlist = Process.GetProcesses();
+                foreach (Process theprocess in processlist)
                 {
-                    Console.WriteLine("Find Process: " + args[0]);
-                    while (true)
+                    if (string.Equals(name.Substring(0, name.Length - 4), theprocess.ProcessName, StringComparison.OrdinalIgnoreCase))
                     {
-                        Process[] processlist = Process.GetProcesses();
-                        foreach (Process theprocess in processlist)
-                        {
-                            if (string.Equals(args[0].Substring(0, args[0].Length - 4), theprocess.ProcessName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                targetPID = theprocess.Id;
-                                return;
-                            }
-                        }
+                        return theprocess.Id;
                     }
-                }
-                if (args.Length != 1 || !File.Exists (args[0])) {
-                    if (args.Length == 1 && args[0].Contains(".exe"))
-                    {
-                        string exePath = args[0].Substring(0, args[0].IndexOf(".exe") + 4);
-                        if (File.Exists(exePath))
-                        {
-                            targetExe = exePath;
-                            targetArg = args[0].Substring(args[0].IndexOf(".exe") + 4, args[0].Length - exePath.Length);
-                            break;
-                        }
-                    }
-                    Console.WriteLine ("Usage: WFRR ProcessID [all\\file\\reg]");
-                    Console.WriteLine ("   or: WFRR ProcessName.exe [all\\file\\reg]");
-                    Console.WriteLine ("   or: WFRR PathToExecutable [all\\file\\reg]");
-                    Console.Write ("> ");
-
-                    args = new string[] { Console.ReadLine () };
-
-                    if (String.IsNullOrEmpty (args[0])) return;
-                } else {
-                    targetExe = args[0];
-                    break;
                 }
             }
         }
