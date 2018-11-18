@@ -252,6 +252,9 @@ namespace RegHook {
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Open {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToOpen, result));
+                if(result != IntPtr.Zero){
+                    throw new Exception("Redirected function execution failed, try to use original function.");
+                }
             }
             catch(Exception e)
             {
@@ -288,6 +291,9 @@ namespace RegHook {
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Create {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToCreate, result));
+                if(result != IntPtr.Zero){
+                    throw new Exception("Redirected function execution failed, try to use original function.");
+                }
             }
             catch (Exception e)
             {
@@ -326,6 +332,9 @@ namespace RegHook {
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToDelete, result));
+                if(result != IntPtr.Zero){
+                    throw new Exception("Redirected function execution failed, try to use original function.");
+                }
             }
             catch (Exception e)
             {
