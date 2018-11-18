@@ -42,10 +42,9 @@ namespace WFRR {
             }
             catch (OptionException e)
             {
-                Console.Write("WFRR: ");
-                Console.WriteLine(e.Message);
-                Console.WriteLine("Try `WFRR.exe --help' for more information.");
-                return;
+                Console.WriteLine("[ERROR]: " + e.Message);
+                Console.WriteLine();
+                isShowHelp = true;
             }
 
             if (isShowHelp || (targetPID <= 0 && targetExe == null) )
