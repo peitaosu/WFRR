@@ -4,11 +4,12 @@
 This project is supposed to redirect all file/registry calls of process to virtual file system/registry.
 
 ## Requirements
-- WinFSRegRedirector.exe
+- WFRR.exe
    * EasyHook 
    * Newtonsoft.Json
+   * NDesk.Options
    ```
-   nuget restore WinFSRegRedirector.sln
+   nuget restore WFRR.sln
    ```
 - Reg2JSON.py
    * python 2.x
@@ -17,40 +18,26 @@ This project is supposed to redirect all file/registry calls of process to virtu
 * RegOpenKey(Ex)
 * RegCreateKey(Ex)
 * RegDeleteKey(Ex)
-* RegSetValue(Ex)
-* RegQueryValue(Ex)
-* RegCloseKey
 * CreateFileW
 * DeleteFileW
 * CopyFileW
 
 ## V_REG.json Sample
-* Keys: please use the key name with lower case.
-* Values: support REG_DWORD, REG_QWORD, REG_SZ and REG_BINARY types.
+* Source: source registry path.
+* Destination: target registry path which you want to redirect to.
 ```
 {
-    "Keys": {
-        "hkey_local_machine": {
-            "Keys": {
-                "software":{
-                    "Keys": {
-                        "microsoft": {
-                            "Keys": {},
-                            "Values": []
-                        }
-                    },
-                    "Values": []
-                }
-            },
-            "Values": [
-                {
-                    "Name": "value_name",
-                    "Type": "REG_DWORD",
-                    "Data": "0x00000001"
-                }
-            ]
+    "Mapping": [
+        {
+            "Source": "",
+            "Destination": ""
+        },
+        {
+            "Source": "",
+            "Destination": ""
         }
-    }
+    ],
+    "VRegRedirected": ""
 }
 ```
 
@@ -75,26 +62,21 @@ This project is supposed to redirect all file/registry calls of process to virtu
 
 ## Usage
 
-Please put `V_REG.json` and `V_FS.json` in the same location as WinFSRegRedirector.exe.
+Please put `V_REG.json` and `V_FS.json` in the same location as WFRR.exe.
 
 ```
-WinFSRegRedirector.exe ProcessID
-                     ProcessName.exe
-                     PathToExecutable
+Usage: WFRR.exe [OPTIONS]
 
-#example
-
-> WinFSRegRedirector.exe 1234
-> WinFSRegRedirector.exe notepad.exe
-> WinFSRegRedirector.exe C:\Windows\notepad.exe
-```
-
-## Convert V_REG.json from .reg file
-
-```
-> python Tool\Reg2JSON.py in.reg out.json
-
-# suppose the in.reg is using utf-16, if not, please change the encoding in get_reg_str_list()
+Options:
+  -e, --exe=VALUE            the executable file to launch and inject.
+  -a, --arg=VALUE            the arguments of executable file to launch and
+                               inject.
+  -n, --pname=VALUE          the name of process want to inject.
+  -i, --pid=VALUE            the id of process want to inject.
+      --all                  inject file hook and registry hook.
+      --file                 inject file hook only.
+      --reg                  inject registry hook only.
+  -h, --help                 show help messages
 ```
 
 ## How To Debug
