@@ -22,6 +22,10 @@ def parse_to_reg(reg_str_list, config, out_reg, is32bit):
     with open(out_reg, "w") as out_file:
         for reg_str in reg_str_list:
             if reg_str.startswith("["):
+                if config["VRegRedirected"] in reg_str:
+                    print("[ERROR]: You probably have converted this file before.")
+                    print("         Please check again and make sure current registry items not include your VRegRedirected path.")
+                    sys.exit()
                 out_file.write("[{}\\{}\n".format(config["VRegRedirected"], reg_str[1:]))
             else:
                 out_file.write(reg_str + "\n")
