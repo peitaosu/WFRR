@@ -1,0 +1,23 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+    </PropertyGroup>
+    <PropertyGroup>
+        <PlatformTarget>$(Platform)</PlatformTarget>
+        <DebugSymbols Condition="'$(Configuration)' == 'Debug'">true</DebugSymbols>
+        <DebugType Condition="'$(Configuration)' == 'Debug'">full</DebugType>
+        <DebugType Condition="'$(Configuration)' == 'Release'">pdbonly</DebugType>
+        <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
+        <OutputPath>..\bin\$(Platform)\$(Configuration)\</OutputPath>
+        <BaseIntermediateOutputPath>..\obj</BaseIntermediateOutputPath>
+        <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Platform)\$(Configuration)\</IntermediateOutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;$(DefineConstants)</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+</Project>
