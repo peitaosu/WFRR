@@ -22,6 +22,14 @@ This project is supposed to redirect all file/registry calls of process to virtu
 * DeleteFileW
 * CopyFileW
 
+## Build
+* .NET 4.5.2+/VS2015+
+    ```
+    # In MSBuild Command Prompt for VS2015/VS2017 #
+    
+    >.\Build.bat
+    ```
+
 ## V_REG.json Sample
 * Source: source registry path.
 * Destination: target registry path which you want to redirect to.
