@@ -8,16 +8,23 @@
     </PropertyGroup>
     <PropertyGroup>
         <PlatformTarget>$(Platform)</PlatformTarget>
-        <DebugSymbols Condition="'$(Configuration)' == 'Debug'">true</DebugSymbols>
-        <DebugType Condition="'$(Configuration)' == 'Debug'">full</DebugType>
-        <DebugType Condition="'$(Configuration)' == 'Release'">pdbonly</DebugType>
-        <Optimize Condition="'$(Configuration)' == 'Release'">true</Optimize>
         <OutputPath>..\bin\$(Platform)\$(Configuration)\</OutputPath>
         <BaseIntermediateOutputPath>..\obj</BaseIntermediateOutputPath>
         <IntermediateOutputPath>$(BaseIntermediateOutputPath)\$(Platform)\$(Configuration)\</IntermediateOutputPath>
         <DefineConstants>TRACE</DefineConstants>
-        <DefineConstants Condition="'$(Configuration)' == 'Debug'">DEBUG;$(DefineConstants)</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <DefineConstants>DEBUG;$(DefineConstants)</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include="..\BuildCfg\VersionAssembly.cs" />
+    </ItemGroup>
 </Project>
