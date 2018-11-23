@@ -28,13 +28,13 @@ namespace RegHook
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
         internal delegate IntPtr RegCreateKeyEx_Delegate(
             IntPtr hKey, 
-            string lpSubKey, 
+            string subKey, 
             IntPtr Reserved, 
             string lpClass, 
             RegOption dwOptions, 
             RegSAM samDesired, 
             ref SECURITY_ATTRIBUTES lpSecurityAttributes, 
-            out IntPtr phkResult, 
+            out IntPtr hkResult, 
             out RegResult lpdwDisposition);
         
         [StructLayout(LayoutKind.Sequential)]
@@ -82,13 +82,13 @@ namespace RegHook
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyEx")]
         internal static extern IntPtr RegCreateKeyEx(
             IntPtr hKey, 
-            string lpSubKey, 
+            string subKey, 
             IntPtr Reserved, 
             string lpClass, 
             RegOption dwOptions, 
             RegSAM samDesired, 
             ref SECURITY_ATTRIBUTES lpSecurityAttributes, 
-            out IntPtr phkResult, 
+            out IntPtr hkResult, 
             out RegResult lpdwDisposition);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
