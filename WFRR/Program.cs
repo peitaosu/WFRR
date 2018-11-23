@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Runtime.InteropServices;
 using NDesk.Options;
 
 namespace WFRR {
@@ -19,6 +20,7 @@ namespace WFRR {
             string fsChannelName = null;
 
             bool isShowHelp = false;
+            bool isBackground = false;
             var parser = new OptionSet() {
                 { "e|exe=", "the executable file to launch and inject.",
                    v => { if (v != null) targetExe = v; } },
@@ -34,7 +36,9 @@ namespace WFRR {
                    v => { if (v != null) inject="file"; } },
                 { "reg", "inject registry hook only.",
                    v => { if (v != null) inject="reg"; } },
-                { "h|help",  "show help messages",
+                { "b|bg", "runs in background.",
+                   v => isBackground = v != null },
+                { "h|help", "show help messages.",
                    v => isShowHelp = v != null },
             };
 
@@ -47,6 +51,12 @@ namespace WFRR {
                 Console.WriteLine("[ERROR]: " + e.Message);
                 Console.WriteLine();
                 isShowHelp = true;
+            }
+
+            if (isBackground)
+            {
+                var hWnd = GetConsoleWindow();
+                ShowWindow(hWnd, 0);
             }
 
             if (isShowHelp || (targetPID <= 0 && targetExe == null) )
@@ -155,9 +165,9 @@ namespace WFRR {
                 Thread.Sleep(10000);
             }
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine ("<The process has exited, press any key to exit.>");
+            Console.WriteLine ("<The process has exited, will auto exit in 5 seconds.>");
             Console.ResetColor ();
-            Console.ReadKey ();
+            Thread.Sleep(5000);
         }
 
         static int FindProcessIdByName(string name)
@@ -180,5 +190,11 @@ namespace WFRR {
         {
             return Process.GetProcesses().Any(x => x.Id == pid);
         }
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }
