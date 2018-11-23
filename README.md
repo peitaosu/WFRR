@@ -16,7 +16,6 @@ This project is supposed to redirect all file/registry calls of process to virtu
 
 ## Supported APIs
 * RegOpenKey(Ex)
-* RegCreateKey(Ex)
 * RegDeleteKey(Ex)
 * CreateFileW
 * DeleteFileW
@@ -84,7 +83,8 @@ Options:
       --all                  inject file hook and registry hook.
       --file                 inject file hook only.
       --reg                  inject registry hook only.
-  -h, --help                 show help messages
+  -b, --bg                   runs in background.
+  -h, --help                 show help messages.
 ```
 
 
