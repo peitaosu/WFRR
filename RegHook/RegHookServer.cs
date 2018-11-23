@@ -172,7 +172,7 @@ namespace RegHook {
                 case "-2147483645":
                     return "HKEY_USERS";
                 default:
-                    return "";
+                    return "HKEY_LOCAL_MACHINE";
             }
         }
 
