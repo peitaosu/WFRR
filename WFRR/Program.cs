@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using NDesk.Options;
 
 namespace WFRR {
@@ -148,8 +150,12 @@ namespace WFRR {
                 Console.WriteLine (e.ToString ());
             }
 
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
-            Console.WriteLine ("<Press any key to exit>");
+            while (ProcessAlive(targetPID))
+            {
+                Thread.Sleep(10000);
+            }
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine ("<The process has exited, press any key to exit.>");
             Console.ResetColor ();
             Console.ReadKey ();
         }
@@ -168,6 +174,11 @@ namespace WFRR {
                     }
                 }
             }
+        }
+
+        static bool ProcessAlive(int pid)
+        {
+            return Process.GetProcesses().Any(x => x.Id == pid);
         }
     }
 }
