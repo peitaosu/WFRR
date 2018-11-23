@@ -17,8 +17,8 @@ namespace RegHook
             int samDesired,
             ref IntPtr hkResult);
 
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyExW")]
-        internal static extern IntPtr RegOpenKeyExW(
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegOpenKeyEx")]
+        internal static extern IntPtr RegOpenKeyEx(
             IntPtr hKey,
             string subKey,
             int ulOptions,

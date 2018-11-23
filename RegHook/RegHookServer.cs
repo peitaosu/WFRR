@@ -236,34 +236,34 @@ namespace RegHook {
 
             IntPtr result = IntPtr.Zero;
             string keyToOpen = HKEY_PtrToStr(hKey) + "\\" + subKey;
+            bool callorigin = false;
 
             foreach (VRegKeyMapping map in _vreg.Mapping)
             {
                 if (keyToOpen.ToUpper().Contains(map.Source.ToUpper()))
                 {
                     keyToOpen = keyToOpen.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
-                    break;
+                    result = WinAPI.RegOpenKeyEx(vreg_root, keyToOpen, ulOptions, samDesired, ref hkResult);
+                    this._messageQueue.Enqueue(
+                        string.Format("[{0}:{1}]: Open {2} {3} return code: {4}",
+                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToOpen, result));
+                    if(result != IntPtr.Zero){
+                        callorigin = true;
+                        break;
+                    }else{
+                        return result;
+                    }
                 }
             }
 
-            try
+            if(callorigin)
             {
-                result = WinAPI.RegOpenKeyExW(vreg_root, keyToOpen, ulOptions, samDesired, ref hkResult);
+                this._messageQueue.Enqueue("Calling original API...");
+                result = WinAPI.RegOpenKeyEx(hKey, subKey, ulOptions, samDesired, ref hkResult);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Open {2} {3} return code: {4}",
-                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToOpen, result));
-                if(result != IntPtr.Zero){
-                    throw new Exception("Redirected function execution failed, try to use original function.");
-                }
-            }
-            catch(Exception e)
-            {
-                this._messageQueue.Enqueue(e.Message);
-                result = WinAPI.RegOpenKeyExW(hKey, subKey, ulOptions, samDesired, ref hkResult);
-                this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: Open {2} {3} return code: {4}",
-                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hKey, subKey, result));
-
+                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
+                return result;
             }
             return result;
         }
@@ -275,34 +275,34 @@ namespace RegHook {
 
             IntPtr result = IntPtr.Zero;
             string keyToCreate = HKEY_PtrToStr(hKey) + "\\" + subKey;
+            bool callorigin = false;
 
             foreach (VRegKeyMapping map in _vreg.Mapping)
             {
                 if (keyToCreate.ToUpper().Contains(map.Source.ToUpper()))
                 {
                     keyToCreate = keyToCreate.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
-                    break;
+                    result = WinAPI.RegCreateKeyEx(vreg_root, keyToCreate, ref hkResult);
+                    this._messageQueue.Enqueue(
+                        string.Format("[{0}:{1}]: Create {2} {3} return code: {4}",
+                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToCreate, result));
+                    if(result != IntPtr.Zero){
+                        callorigin = true;
+                        break;
+                    }else{
+                        return result;
+                    }
                 }
             }
 
-            try
+            if(callorigin)
             {
-                result = WinAPI.RegCreateKeyEx(vreg_root, keyToCreate, ref hkResult);
-                this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: Create {2} {3} return code: {4}",
-                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToCreate, result));
-                if(result != IntPtr.Zero){
-                    throw new Exception("Redirected function execution failed, try to use original function.");
-                }
-            }
-            catch (Exception e)
-            {
-                this._messageQueue.Enqueue(e.Message);
+                this._messageQueue.Enqueue("Calling original API...");
                 result = WinAPI.RegCreateKeyEx(hKey, subKey, ref hkResult);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Create {2} {3} return code: {4}",
-                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hKey, subKey, result));
-
+                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
+                return result;
             }
 
             return result;
@@ -316,33 +316,34 @@ namespace RegHook {
         {
             IntPtr result = IntPtr.Zero;
             string keyToDelete = HKEY_PtrToStr(hKey) + "\\" + subKey;
+            bool callorigin = false;
 
             foreach (VRegKeyMapping map in _vreg.Mapping)
             {
                 if (keyToDelete.ToUpper().Contains(map.Source.ToUpper()))
                 {
                     keyToDelete = keyToDelete.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
-                    break;
+                    result = WinAPI.RegDeleteKeyEx(vreg_root, keyToDelete, samDesired, Reserved);
+                    this._messageQueue.Enqueue(
+                        string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
+                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToDelete, result));
+                    if(result != IntPtr.Zero){
+                        callorigin = true;
+                        break;
+                    }else{
+                        return result;
+                    }
                 }
             }
 
-            try
+            if(callorigin)
             {
-                result = WinAPI.RegDeleteKeyEx(vreg_root, keyToDelete, samDesired, Reserved);
-                this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
-                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), vreg_root, keyToDelete, result));
-                if(result != IntPtr.Zero){
-                    throw new Exception("Redirected function execution failed, try to use original function.");
-                }
-            }
-            catch (Exception e)
-            {
-                this._messageQueue.Enqueue(e.Message);
+                this._messageQueue.Enqueue("Calling original API...");
                 result = WinAPI.RegDeleteKeyEx(hKey, subKey, samDesired, Reserved);
                 this._messageQueue.Enqueue(
                     string.Format("[{0}:{1}]: Delete {2} {3} return code: {4}",
-                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), hKey, subKey, result));
+                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
+                return result;
 
             }
 
