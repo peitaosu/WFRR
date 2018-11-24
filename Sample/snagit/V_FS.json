@@ -1,0 +1,24 @@
+{
+    "Mapping" : [
+        {
+            "Source": "C:\\ProgramData\\regid.1995-08.com.techsmith",
+            "Destination": "C:\\VFS\\ProgramData\\regid.1995-08.com.techsmith"
+        },
+        {
+            "Source": "C:\\ProgramData\\TechSmith",
+            "Destination": "C:\\VFS\\ProgramData\\TechSmith"
+        },
+        {
+            "Source": "C:\\Program Files (x86)\\Common Files\\TechSmith Shared",
+            "Destination": "C:\\VFS\\ProgramFilesCommonX86\\TechSmith Shared"
+        },
+        {
+            "Source": "C:\\Program Files (x86)\\TechSmith",
+            "Destination": "C:\\VFS\\ProgramFilesX86\\TechSmith"
+        },
+        {
+            "Source": "C:\\Windows\\INF\\NTPRINT.PNF",
+            "Destination": "C:\\VFS\\Windows\\INF\\NTPRINT.PNF"
+        }
+    ]
+}

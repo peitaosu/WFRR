@@ -1,0 +1,17 @@
+{
+    "Mapping" : [
+        {
+            "Source": "HKEY_CLASSES_ROOT",
+            "Destination": "HKEY_CLASSES_ROOT"
+        },
+        {
+            "Source": "HKEY_LOCAL_MACHINE",
+            "Destination": "HKEY_LOCAL_MACHINE"
+        },
+        {
+            "Source": "HKEY_CURRENT_USER",
+            "Destination": "HKEY_CURRENT_USER"
+        }
+    ],
+    "VRegRedirected": "HKEY_LOCAL_MACHINE\\Software\\Wow6432Node\\WFRR\\SNAGIT"
+}
