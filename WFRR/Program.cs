@@ -88,7 +88,7 @@ namespace WFRR {
                     if (targetPID > 0)
                     {
                         // Injecting into existing process by Id
-                        Console.WriteLine("Attempting to inject into process {0}", targetPID);
+                        Console.WriteLine("[WFRR]: Attempting to inject into process {0}", targetPID);
 
                         // inject into existing process
                         EasyHook.RemoteHooking.Inject(
@@ -102,7 +102,7 @@ namespace WFRR {
                     else if (!string.IsNullOrEmpty(targetExe))
                     {
                         // Create a new process and then inject into it
-                        Console.WriteLine("Attempting to create and inject into {0}", targetExe);
+                        Console.WriteLine("[WFRR]: Attempting to create and inject into {0}", targetExe);
 
                         // start and inject into a new process
                         EasyHook.RemoteHooking.CreateAndInject(
@@ -123,7 +123,7 @@ namespace WFRR {
                     if (targetPID > 0)
                     {
                         // Injecting into existing process by Id
-                        Console.WriteLine("Attempting to inject into process {0}", targetPID);
+                        Console.WriteLine("[WFRR]: Attempting to inject into process {0}", targetPID);
 
                         // inject into existing process
                         EasyHook.RemoteHooking.Inject(
@@ -137,7 +137,7 @@ namespace WFRR {
                     else if (!string.IsNullOrEmpty(targetExe))
                     {
                         // Create a new process and then inject into it
-                        Console.WriteLine("Attempting to create and inject into {0}", targetExe);
+                        Console.WriteLine("[WFRR]: Attempting to create and inject into {0}", targetExe);
 
                         // start and inject into a new process
                         EasyHook.RemoteHooking.CreateAndInject(
@@ -155,7 +155,7 @@ namespace WFRR {
                 }
             } catch (Exception e) {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine ("There was an error while injecting into target:");
+                Console.WriteLine ("[WFRR]: There was an error while injecting into target:");
                 Console.ResetColor ();
                 Console.WriteLine (e.ToString ());
             }
@@ -172,7 +172,7 @@ namespace WFRR {
 
         static int FindProcessIdByName(string name)
         {
-            Console.WriteLine("Find Process: " + name);
+            Console.WriteLine("[WFRR]: Looking for process: " + name);
             while (true)
             {
                 Process[] processlist = Process.GetProcesses();
