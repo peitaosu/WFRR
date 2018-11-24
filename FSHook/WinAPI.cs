@@ -70,11 +70,11 @@ namespace FSHook
             IntPtr lpLastWriteTime);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal delegate IntPtr DeleteFileW_Delegate(
+        internal delegate bool DeleteFileW_Delegate(
             string lpFileName);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, CallingConvention = CallingConvention.StdCall)]
-        internal static extern IntPtr DeleteFile(
+        internal static extern bool DeleteFile(
             string lpFileName);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
