@@ -125,7 +125,6 @@ namespace FSHook {
 
             IntPtr result = IntPtr.Zero;
             string fileToCreate = InFileName;
-            bool callorigin = false;
 
             try {
                 foreach (VFSMapping map in _vfs.Mapping)
@@ -138,7 +137,6 @@ namespace FSHook {
                                 string.Format("[{0}:{1}]: [Redirected] CreateFile {2} return code: {3}",
                                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), fileToCreate, result));
                         if(result == new IntPtr(-1)){
-                            callorigin = true;
                             break;
                         }else{
                             return result;
@@ -146,17 +144,14 @@ namespace FSHook {
                     }
                 }
 
-                if(callorigin)
-                {
-                    this._messageQueue.Enqueue(
-                        string.Format("[{0}:{1}]: Calling from original location...",
-                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
-                    result = WinAPI.CreateFile(InFileName, InDesiredAccess, InShareMode, InSecurityAttributes, InCreationDisposition, InFlagsAndAttributes, InTemplateFile);
-                    this._messageQueue.Enqueue(
-                            string.Format("[{0}:{1}]: [Origin] CreateFile {2} return code: {3}",
-                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), InFileName, result));
-                    return result;
-                }
+                this._messageQueue.Enqueue(
+                    string.Format("[{0}:{1}]: Calling from original location...",
+                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
+                result = WinAPI.CreateFile(InFileName, InDesiredAccess, InShareMode, InSecurityAttributes, InCreationDisposition, InFlagsAndAttributes, InTemplateFile);
+                this._messageQueue.Enqueue(
+                        string.Format("[{0}:{1}]: [Origin] CreateFile {2} return code: {3}",
+                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), InFileName, result));
+                return result;
             }
             catch(Exception e)
             {
@@ -175,7 +170,6 @@ namespace FSHook {
 
             bool result = false;
             string fileToDelete = lpFileName;
-            bool callorigin = false;
 
             try {
                 foreach (VFSMapping map in _vfs.Mapping)
@@ -188,7 +182,6 @@ namespace FSHook {
                                 string.Format("[{0}:{1}]: [Redirected] DeleteFile {2} return code: {3}",
                                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), fileToDelete, result));
                         if(!result){
-                            callorigin = true;
                             break;
                         }else{
                             return result;
@@ -196,17 +189,14 @@ namespace FSHook {
                     }
                 }
 
-                if(callorigin)
-                {
-                    this._messageQueue.Enqueue(
-                        string.Format("[{0}:{1}]: Calling from original location...",
-                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
-                    result = WinAPI.DeleteFile(lpFileName);
-                    this._messageQueue.Enqueue(
-                            string.Format("[{0}:{1}]: [Origin] CreateFile {2} return code: {3}",
-                                EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpFileName, result));
-                    return result;
-                }
+                this._messageQueue.Enqueue(
+                    string.Format("[{0}:{1}]: Calling from original location...",
+                        EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
+                result = WinAPI.DeleteFile(lpFileName);
+                this._messageQueue.Enqueue(
+                        string.Format("[{0}:{1}]: [Origin] CreateFile {2} return code: {3}",
+                            EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpFileName, result));
+                return result;
             }
             catch(Exception e)
             {
