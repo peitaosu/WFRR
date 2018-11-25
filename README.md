@@ -3,6 +3,8 @@
 
 This project is supposed to redirect all file/registry calls of process to virtual file system/registry.
 
+![Snagit Works with WFRR](Sample/snagit/snagit.png)
+
 ## Requirements
 - WFRR.exe
    * EasyHook 
