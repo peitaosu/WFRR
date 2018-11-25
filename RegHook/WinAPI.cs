@@ -92,6 +92,18 @@ namespace RegHook
             out RegResult lpdwDisposition);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
+        internal delegate IntPtr RegCreateKey_Delegate(
+            IntPtr hKey,
+            string subKey,
+            ref IntPtr hkResult);
+
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyA")]
+        internal static extern IntPtr RegCreateKey(
+            IntPtr hKey,
+            string subKey,
+            ref IntPtr hkResult);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
         internal delegate IntPtr RegDeleteKeyEx_Delegate(
             IntPtr hKey,
             string subKey,
