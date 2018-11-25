@@ -1,41 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json;
-using System.Text;
 using System.Reflection;
+using Newtonsoft.Json;
 
-namespace RegHook {
+namespace RegHook
+{
 
-    public class ServerInterface : MarshalByRefObject {
-        public void IsInstalled (int clientPID) {
-            Console.WriteLine ("[WFRR:RegHook]: RegHook has been injected into process {0}.\r\n", clientPID);
+    public class ServerInterface : MarshalByRefObject
+    {
+        public void IsInstalled(int clientPID)
+        {
+            Console.WriteLine("[WFRR:RegHook]: RegHook has been injected into process {0}.\r\n", clientPID);
         }
 
-        public void ReportMessages (int clientPID, string[] messages) {
-            for (int i = 0; i < messages.Length; i++) {
-                Console.WriteLine (messages[i].Replace("{", "{{").Replace("}", "}}"), clientPID);
+        public void ReportMessages(int clientPID, string[] messages)
+        {
+            for (int i = 0; i < messages.Length; i++)
+            {
+                Console.WriteLine(messages[i].Replace("{", "{{").Replace("}", "}}"), clientPID);
             }
         }
 
-        public void ReportMessage (int clientPID, string message) {
-            Console.WriteLine (message);
+        public void ReportMessage(int clientPID, string message)
+        {
+            Console.WriteLine(message);
         }
 
-        public void ReportException (Exception e) {
-            Console.WriteLine ("[WFRR:RegHook]: The target process has reported an error:\r\n" + e.ToString ());
+        public void ReportException(Exception e)
+        {
+            Console.WriteLine("[WFRR:RegHook]: The target process has reported an error:\r\n" + e.ToString());
         }
 
-        public void Ping () { }
+        public void Ping() { }
     }
 
-    public class InjectionEntryPoint : EasyHook.IEntryPoint {
+    public class InjectionEntryPoint : EasyHook.IEntryPoint
+    {
 
         ServerInterface _server = null;
 
-        Queue<string> _messageQueue = new Queue<string> ();
+        Queue<string> _messageQueue = new Queue<string>();
 
         string vreg_path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "V_REG.json");
         string vreg_json = null;
@@ -44,28 +49,32 @@ namespace RegHook {
         string vreg_root_str = null;
         string vreg_redirected = null;
 
-        public InjectionEntryPoint (
+        public InjectionEntryPoint(
             EasyHook.RemoteHooking.IContext context,
-            string channelName) {
-            _server = EasyHook.RemoteHooking.IpcConnectClient<ServerInterface> (channelName);
-            _server.Ping ();
+            string channelName)
+        {
+            _server = EasyHook.RemoteHooking.IpcConnectClient<ServerInterface>(channelName);
+            _server.Ping();
         }
 
-        public void Run (
+        public void Run(
             EasyHook.RemoteHooking.IContext context,
-            string channelName) {
+            string channelName)
+        {
 
-            _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
+            _server.IsInstalled(EasyHook.RemoteHooking.GetCurrentProcessId());
 
-            try {
-                vreg_json = new StreamReader (vreg_path).ReadToEnd ();
-                _vreg = JsonConvert.DeserializeObject<VRegKey> (vreg_json);
+            try
+            {
+                vreg_json = new StreamReader(vreg_path).ReadToEnd();
+                _vreg = JsonConvert.DeserializeObject<VRegKey>(vreg_json);
                 vreg_root_str = _vreg.VRegRedirected.Split('\\')[0];
                 vreg_root = HKEY_StrToPtr(vreg_root_str);
                 vreg_redirected = _vreg.VRegRedirected.Substring(vreg_root_str.Length + 1);
             }
-            catch (Exception e) {
-                _server.ReportException (e);
+            catch (Exception e)
+            {
+                _server.ReportException(e);
             }
 
             var regOpenKeyAHook = EasyHook.LocalHook.Create(
@@ -96,18 +105,18 @@ namespace RegHook {
             regOpenKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegOpenKeyExW hook installed");
 
-            var regCreateKeyAHook = EasyHook.LocalHook.Create(	
-                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyA"),	
-                new WinAPI.RegCreateKey_Delegate(RegCreateKey_Hook),	
-                this);	
-            regCreateKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });	
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegCreateKeyA hook installed");	
+            var regCreateKeyAHook = EasyHook.LocalHook.Create(
+                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyA"),
+                new WinAPI.RegCreateKey_Delegate(RegCreateKey_Hook),
+                this);
+            regCreateKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegCreateKeyA hook installed");
 
-             var regCreateKeyWHook = EasyHook.LocalHook.Create(	
-                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyW"),	
-                new WinAPI.RegCreateKey_Delegate(RegCreateKey_Hook),	
-                this);	
-            regCreateKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });	
+            var regCreateKeyWHook = EasyHook.LocalHook.Create(
+               EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyW"),
+               new WinAPI.RegCreateKey_Delegate(RegCreateKey_Hook),
+               this);
+            regCreateKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegCreateKeyW hook installed");
 
             var regDeleteKeyAHook = EasyHook.LocalHook.Create(
@@ -138,39 +147,46 @@ namespace RegHook {
             regDeleteKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegDeleteKeyExW hook installed");
 
-            EasyHook.RemoteHooking.WakeUpProcess ();
+            EasyHook.RemoteHooking.WakeUpProcess();
 
-            try {
-                while (true) {
-                    System.Threading.Thread.Sleep (500);
+            try
+            {
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(500);
 
                     string[] queued = null;
 
-                    lock (_messageQueue) {
-                        queued = _messageQueue.ToArray ();
-                        _messageQueue.Clear ();
+                    lock (_messageQueue)
+                    {
+                        queued = _messageQueue.ToArray();
+                        _messageQueue.Clear();
                     }
 
-                    if (queued != null && queued.Length > 0) {
-                        _server.ReportMessages (EasyHook.RemoteHooking.GetCurrentProcessId (), queued);
-                    } else {
-                        _server.Ping ();
+                    if (queued != null && queued.Length > 0)
+                    {
+                        _server.ReportMessages(EasyHook.RemoteHooking.GetCurrentProcessId(), queued);
+                    }
+                    else
+                    {
+                        _server.Ping();
                     }
                 }
-            } catch { }
+            }
+            catch { }
 
             regOpenKeyAHook.Dispose();
             regOpenKeyWHook.Dispose();
             regOpenKeyExAHook.Dispose();
             regOpenKeyExWHook.Dispose();
-            regCreateKeyAHook.Dispose();	
-            regCreateKeyWHook.Dispose();	
+            regCreateKeyAHook.Dispose();
+            regCreateKeyWHook.Dispose();
             regDeleteKeyAHook.Dispose();
             regDeleteKeyWHook.Dispose();
             regDeleteKeyExAHook.Dispose();
             regDeleteKeyExWHook.Dispose();
 
-            EasyHook.LocalHook.Release ();
+            EasyHook.LocalHook.Release();
         }
 
         string HKEY_PtrToStr(IntPtr hkey)
@@ -211,12 +227,13 @@ namespace RegHook {
             }
         }
 
-        IntPtr RegOpenKeyEx_Hook (
+        IntPtr RegOpenKeyEx_Hook(
             IntPtr hKey,
             string subKey,
             int ulOptions,
             int samDesired,
-            ref IntPtr hkResult) {
+            ref IntPtr hkResult)
+        {
 
             this._messageQueue.Enqueue(
                 string.Format("[{0}:{1}]: Calling RegOpenKeyEx {2} {3}",
@@ -225,7 +242,8 @@ namespace RegHook {
             IntPtr result = IntPtr.Zero;
             string keyToOpen = HKEY_PtrToStr(hKey) + "\\" + subKey;
 
-            try { 
+            try
+            {
                 foreach (VRegKeyMapping map in _vreg.Mapping)
                 {
                     if (keyToOpen.ToUpper().Contains(map.Source.ToUpper()))
@@ -235,9 +253,12 @@ namespace RegHook {
                         this._messageQueue.Enqueue(
                             string.Format("[{0}:{1}]: [Redirected] RegOpenKeyEx {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToOpen, result));
-                        if(result != IntPtr.Zero){
+                        if (result != IntPtr.Zero)
+                        {
                             break;
-                        }else{
+                        }
+                        else
+                        {
                             return result;
                         }
                     }
@@ -252,17 +273,18 @@ namespace RegHook {
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
             }
             return result;
         }
 
-        IntPtr RegCreateKey_Hook (
+        IntPtr RegCreateKey_Hook(
             IntPtr hKey,
             string subKey,
-            ref IntPtr hkResult){
+            ref IntPtr hkResult)
+        {
 
             this._messageQueue.Enqueue(
                 string.Format("[{0}:{1}]: Calling RegCreateKey {2} {3}",
@@ -272,7 +294,8 @@ namespace RegHook {
             IntPtr result = IntPtr.Zero;
             string keyToCreate = HKEY_PtrToStr(hKey) + "\\" + subKey;
 
-            try {
+            try
+            {
                 foreach (VRegKeyMapping map in _vreg.Mapping)
                 {
                     if (keyToCreate.ToUpper().Contains(map.Source.ToUpper()))
@@ -282,9 +305,12 @@ namespace RegHook {
                         this._messageQueue.Enqueue(
                             string.Format("[{0}:{1}]: [Redirected] RegCreateKey {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToCreate, result));
-                        if(result != IntPtr.Zero){
+                        if (result != IntPtr.Zero)
+                        {
                             break;
-                        }else{
+                        }
+                        else
+                        {
                             return result;
                         }
                     }
@@ -299,7 +325,7 @@ namespace RegHook {
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
             }
@@ -351,7 +377,8 @@ namespace RegHook {
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
                 return result;
 
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
             }

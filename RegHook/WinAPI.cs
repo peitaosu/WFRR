@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RegHook
 {
@@ -27,16 +23,16 @@ namespace RegHook
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]
         internal delegate IntPtr RegCreateKeyEx_Delegate(
-            IntPtr hKey, 
-            string subKey, 
-            IntPtr Reserved, 
-            string lpClass, 
-            RegOption dwOptions, 
-            RegSAM samDesired, 
-            ref SECURITY_ATTRIBUTES lpSecurityAttributes, 
-            out IntPtr hkResult, 
+            IntPtr hKey,
+            string subKey,
+            IntPtr Reserved,
+            string lpClass,
+            RegOption dwOptions,
+            RegSAM samDesired,
+            ref SECURITY_ATTRIBUTES lpSecurityAttributes,
+            out IntPtr hkResult,
             out RegResult lpdwDisposition);
-        
+
         [StructLayout(LayoutKind.Sequential)]
         public struct SECURITY_ATTRIBUTES
         {
@@ -81,14 +77,14 @@ namespace RegHook
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyEx")]
         internal static extern IntPtr RegCreateKeyEx(
-            IntPtr hKey, 
-            string subKey, 
-            IntPtr Reserved, 
-            string lpClass, 
-            RegOption dwOptions, 
-            RegSAM samDesired, 
-            ref SECURITY_ATTRIBUTES lpSecurityAttributes, 
-            out IntPtr hkResult, 
+            IntPtr hKey,
+            string subKey,
+            IntPtr Reserved,
+            string lpClass,
+            RegOption dwOptions,
+            RegSAM samDesired,
+            ref SECURITY_ATTRIBUTES lpSecurityAttributes,
+            out IntPtr hkResult,
             out RegResult lpdwDisposition);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Auto, SetLastError = true)]

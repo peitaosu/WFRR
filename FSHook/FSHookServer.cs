@@ -1,64 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
-using Newtonsoft.Json;
-using System.Text;
 using System.Reflection;
+using Newtonsoft.Json;
 
-namespace FSHook {
+namespace FSHook
+{
 
-    public class ServerInterface : MarshalByRefObject {
-        public void IsInstalled (int clientPID) {
-            Console.WriteLine ("[WFRR:FSHook]: FSHook has been injected into process {0}.\r\n", clientPID);
+    public class ServerInterface : MarshalByRefObject
+    {
+        public void IsInstalled(int clientPID)
+        {
+            Console.WriteLine("[WFRR:FSHook]: FSHook has been injected into process {0}.\r\n", clientPID);
         }
 
-        public void ReportMessages (int clientPID, string[] messages) {
-            for (int i = 0; i < messages.Length; i++) {
-                Console.WriteLine (messages[i], clientPID);
+        public void ReportMessages(int clientPID, string[] messages)
+        {
+            for (int i = 0; i < messages.Length; i++)
+            {
+                Console.WriteLine(messages[i], clientPID);
             }
         }
 
-        public void ReportMessage (int clientPID, string message) {
-            Console.WriteLine (message);
+        public void ReportMessage(int clientPID, string message)
+        {
+            Console.WriteLine(message);
         }
 
-        public void ReportException (Exception e) {
-            Console.WriteLine ("[WFRR:FSHook]: The target process has reported an error:\r\n" + e.ToString ());
+        public void ReportException(Exception e)
+        {
+            Console.WriteLine("[WFRR:FSHook]: The target process has reported an error:\r\n" + e.ToString());
         }
 
-        public void Ping () { }
+        public void Ping() { }
     }
 
-    public class InjectionEntryPoint : EasyHook.IEntryPoint {
+    public class InjectionEntryPoint : EasyHook.IEntryPoint
+    {
 
         ServerInterface _server = null;
 
-        Queue<string> _messageQueue = new Queue<string> ();
+        Queue<string> _messageQueue = new Queue<string>();
 
         string vfs_path = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "V_FS.json");
         string vfs_json = null;
         VFS _vfs = null;
 
-        public InjectionEntryPoint (
+        public InjectionEntryPoint(
             EasyHook.RemoteHooking.IContext context,
-            string channelName) {
-            _server = EasyHook.RemoteHooking.IpcConnectClient<ServerInterface> (channelName);
-            _server.Ping ();
+            string channelName)
+        {
+            _server = EasyHook.RemoteHooking.IpcConnectClient<ServerInterface>(channelName);
+            _server.Ping();
         }
 
-        public void Run (
+        public void Run(
             EasyHook.RemoteHooking.IContext context,
-            string channelName) {
+            string channelName)
+        {
 
-            _server.IsInstalled (EasyHook.RemoteHooking.GetCurrentProcessId ());
+            _server.IsInstalled(EasyHook.RemoteHooking.GetCurrentProcessId());
 
-            try {
-                vfs_json = new StreamReader (vfs_path).ReadToEnd ();
-                _vfs = JsonConvert.DeserializeObject<VFS> (vfs_json);
-            } catch (Exception e) {
-                _server.ReportException (e);
+            try
+            {
+                vfs_json = new StreamReader(vfs_path).ReadToEnd();
+                _vfs = JsonConvert.DeserializeObject<VFS>(vfs_json);
+            }
+            catch (Exception e)
+            {
+                _server.ReportException(e);
             }
 
             var fsCreateFileHook = EasyHook.LocalHook.Create(
@@ -82,31 +92,38 @@ namespace FSHook {
             fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:FSHook]: CopyFileW hook installed");
 
-            EasyHook.RemoteHooking.WakeUpProcess ();
+            EasyHook.RemoteHooking.WakeUpProcess();
 
-            try {
-                while (true) {
-                    System.Threading.Thread.Sleep (500);
+            try
+            {
+                while (true)
+                {
+                    System.Threading.Thread.Sleep(500);
 
                     string[] queued = null;
 
-                    lock (_messageQueue) {
-                        queued = _messageQueue.ToArray ();
-                        _messageQueue.Clear ();
+                    lock (_messageQueue)
+                    {
+                        queued = _messageQueue.ToArray();
+                        _messageQueue.Clear();
                     }
 
-                    if (queued != null && queued.Length > 0) {
-                        _server.ReportMessages (EasyHook.RemoteHooking.GetCurrentProcessId (), queued);
-                    } else {
-                        _server.Ping ();
+                    if (queued != null && queued.Length > 0)
+                    {
+                        _server.ReportMessages(EasyHook.RemoteHooking.GetCurrentProcessId(), queued);
+                    }
+                    else
+                    {
+                        _server.Ping();
                     }
                 }
-            } catch { }
+            }
+            catch { }
 
             fsCreateFileHook.Dispose();
             fsDeleteFileHook.Dispose();
             fsCopyFileHook.Dispose();
-            EasyHook.LocalHook.Release ();
+            EasyHook.LocalHook.Release();
         }
 
         IntPtr CreateFile_Hook(
@@ -126,7 +143,8 @@ namespace FSHook {
             IntPtr result = IntPtr.Zero;
             string fileToCreate = InFileName;
 
-            try {
+            try
+            {
                 foreach (VFSMapping map in _vfs.Mapping)
                 {
                     if (InFileName.Contains(map.Source))
@@ -136,9 +154,12 @@ namespace FSHook {
                         this._messageQueue.Enqueue(
                                 string.Format("[{0}:{1}]: [Redirected] CreateFile {2} return code: {3}",
                                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), fileToCreate, result));
-                        if(result == new IntPtr(-1)){
+                        if (result == new IntPtr(-1))
+                        {
                             break;
-                        }else{
+                        }
+                        else
+                        {
                             return result;
                         }
                     }
@@ -153,7 +174,7 @@ namespace FSHook {
                             EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), InFileName, result));
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
             }
@@ -171,7 +192,8 @@ namespace FSHook {
             bool result = false;
             string fileToDelete = lpFileName;
 
-            try {
+            try
+            {
                 foreach (VFSMapping map in _vfs.Mapping)
                 {
                     if (lpFileName.Contains(map.Source))
@@ -181,9 +203,12 @@ namespace FSHook {
                         this._messageQueue.Enqueue(
                                 string.Format("[{0}:{1}]: [Redirected] DeleteFile {2} return code: {3}",
                                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), fileToDelete, result));
-                        if(!result){
+                        if (!result)
+                        {
                             break;
-                        }else{
+                        }
+                        else
+                        {
                             return result;
                         }
                     }
@@ -198,7 +223,7 @@ namespace FSHook {
                             EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpFileName, result));
                 return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
             }
@@ -218,7 +243,8 @@ namespace FSHook {
             string fileToCopy = lpExistingFileName;
             string fileCopyTo = lpNewFileName;
 
-            try {
+            try
+            {
                 foreach (VFSMapping map in _vfs.Mapping)
                 {
                     if (lpExistingFileName.Contains(map.Source))
@@ -234,31 +260,31 @@ namespace FSHook {
                 this._messageQueue.Enqueue(
                         string.Format("[{0}:{1}]: [Redirected] CopyFile {2} to {3} return code: {4}",
                             EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), fileToCopy, fileCopyTo, result));
-                if(result)
+                if (result)
                     return result;
 
                 result = WinAPI.CopyFileW(lpExistingFileName, fileCopyTo, bFailIfExists);
                 this._messageQueue.Enqueue(
                         string.Format("[{0}:{1}]: [Redirected] CopyFile {2} to {3} return code: {4}",
                             EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpExistingFileName, fileCopyTo, result));
-                if(result)
+                if (result)
                     return result;
 
                 result = WinAPI.CopyFileW(fileToCopy, lpNewFileName, bFailIfExists);
                 this._messageQueue.Enqueue(
                         string.Format("[{0}:{1}]: [Redirected] CopyFile {2} to {3} return code: {4}",
                             EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), fileToCopy, lpNewFileName, result));
-                if(result)
+                if (result)
                     return result;
 
                 result = WinAPI.CopyFileW(lpExistingFileName, lpNewFileName, bFailIfExists);
                 this._messageQueue.Enqueue(
                         string.Format("[{0}:{1}]: [Origin] CopyFile {2} to {3} return code: {4}",
                             EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), lpExistingFileName, lpNewFileName, result));
-                if(result)
+                if (result)
                     return result;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 this._messageQueue.Enqueue(e.Message);
             }
