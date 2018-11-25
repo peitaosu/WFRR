@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegHook", "RegHook\RegHook.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSHook", "FSHook\FSHook.csproj", "{CCB51DE7-7141-4091-949C-558CB373FB75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WFRRTest", "WFRRTest\WFRRTest.csproj", "{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{CCB51DE7-7141-4091-949C-558CB373FB75}.Release|x64.Build.0 = Release|x64
 		{CCB51DE7-7141-4091-949C-558CB373FB75}.Release|x86.ActiveCfg = Release|x86
 		{CCB51DE7-7141-4091-949C-558CB373FB75}.Release|x86.Build.0 = Release|x86
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Debug|x64.ActiveCfg = Debug|x64
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Debug|x64.Build.0 = Debug|x64
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Debug|x86.ActiveCfg = Debug|x86
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Debug|x86.Build.0 = Debug|x86
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Release|x64.ActiveCfg = Release|x64
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Release|x64.Build.0 = Release|x64
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Release|x86.ActiveCfg = Release|x86
+		{BA2D8EC0-13F0-4C03-864C-E3193377D0D3}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
