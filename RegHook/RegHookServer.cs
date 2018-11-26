@@ -3,33 +3,36 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
+using log4net;
 
 namespace RegHook
 {
 
     public class ServerInterface : MarshalByRefObject
     {
+        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         public void IsInstalled(int clientPID)
         {
-            Console.WriteLine("[WFRR:RegHook]: RegHook has been injected into process {0}.\r\n", clientPID);
+            _log.Info("[WFRR:RegHook] RegHook has been injected into process: " + clientPID);
         }
 
         public void ReportMessages(int clientPID, string[] messages)
         {
             for (int i = 0; i < messages.Length; i++)
             {
-                Console.WriteLine(messages[i].Replace("{", "{{").Replace("}", "}}"), clientPID);
+                _log.Info("[WFRR:RegHook] " + messages[i].Replace("{", "{{").Replace("}", "}}"));
             }
         }
 
         public void ReportMessage(int clientPID, string message)
         {
-            Console.WriteLine(message);
+            _log.Info("[WFRR:RegHook] " + message);
         }
 
         public void ReportException(Exception e)
         {
-            Console.WriteLine("[WFRR:RegHook]: The target process has reported an error:\r\n" + e.ToString());
+            _log.Error("[WFRR:RegHook] " + e.ToString());
         }
 
         public void Ping() { }
@@ -82,70 +85,70 @@ namespace RegHook
                 new WinAPI.RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
                 this);
             regOpenKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegOpenKeyA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyA hook installed");
 
             var regOpenKeyWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyW"),
                 new WinAPI.RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
                 this);
             regOpenKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegOpenKeyW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyW hook installed");
 
             var regOpenKeyExAHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExA"),
                 new WinAPI.RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
                 this);
             regOpenKeyExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegOpenKeyExA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExA hook installed");
 
             var regOpenKeyExWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegOpenKeyExW"),
                 new WinAPI.RegOpenKeyEx_Delegate(RegOpenKeyEx_Hook),
                 this);
             regOpenKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegOpenKeyExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegOpenKeyExW hook installed");
 
             var regCreateKeyAHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyA"),
                 new WinAPI.RegCreateKey_Delegate(RegCreateKey_Hook),
                 this);
             regCreateKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegCreateKeyA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyA hook installed");
 
             var regCreateKeyWHook = EasyHook.LocalHook.Create(
                EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegCreateKeyW"),
                new WinAPI.RegCreateKey_Delegate(RegCreateKey_Hook),
                this);
             regCreateKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegCreateKeyW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegCreateKeyW hook installed");
 
             var regDeleteKeyAHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyA"),
                 new WinAPI.RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
                 this);
             regDeleteKeyAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegDeleteKeyA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyA hook installed");
 
             var regDeleteKeyWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyW"),
                 new WinAPI.RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
                 this);
             regDeleteKeyWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegDeleteKeyW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyW hook installed");
 
             var regDeleteKeyExAHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyExA"),
                 new WinAPI.RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
                 this);
             regDeleteKeyExAHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegDeleteKeyExA hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExA hook installed");
 
             var regDeleteKeyExWHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("advapi32.dll", "RegDeleteKeyExW"),
                 new WinAPI.RegDeleteKeyEx_Delegate(RegDeleteKeyEx_Hook),
                 this);
             regDeleteKeyExWHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "[WFRR:RegHook]: RegDeleteKeyExW hook installed");
+            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "RegDeleteKeyExW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess();
 
@@ -236,7 +239,7 @@ namespace RegHook
         {
 
             this._messageQueue.Enqueue(
-                string.Format("[{0}:{1}]: Calling RegOpenKeyEx {2} {3}",
+                string.Format("[{0}:{1}] Calling RegOpenKeyEx {2} {3}",
                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey));
 
             IntPtr result = IntPtr.Zero;
@@ -251,7 +254,7 @@ namespace RegHook
                         keyToOpen = keyToOpen.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
                         result = WinAPI.RegOpenKeyEx(vreg_root, keyToOpen, ulOptions, samDesired, ref hkResult);
                         this._messageQueue.Enqueue(
-                            string.Format("[{0}:{1}]: [Redirected] RegOpenKeyEx {2} {3} return code: {4}",
+                            string.Format("[{0}:{1}] [Redirected] RegOpenKeyEx {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToOpen, result));
                         if (result != IntPtr.Zero)
                         {
@@ -265,11 +268,11 @@ namespace RegHook
                 }
 
                 this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: Calling from original location...",
+                    string.Format("[{0}:{1}] Calling from original location...",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
                 result = WinAPI.RegOpenKeyEx(hKey, subKey, ulOptions, samDesired, ref hkResult);
                 this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: [Origin] RegOpenKeyEx {2} {3} return code: {4}",
+                    string.Format("[{0}:{1}] [Origin] RegOpenKeyEx {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
                 return result;
             }
@@ -287,7 +290,7 @@ namespace RegHook
         {
 
             this._messageQueue.Enqueue(
-                string.Format("[{0}:{1}]: Calling RegCreateKey {2} {3}",
+                string.Format("[{0}:{1}] Calling RegCreateKey {2} {3}",
                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey));
 
             hkResult = IntPtr.Zero;
@@ -303,7 +306,7 @@ namespace RegHook
                         keyToCreate = keyToCreate.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
                         result = WinAPI.RegCreateKey(vreg_root, keyToCreate, ref hkResult);
                         this._messageQueue.Enqueue(
-                            string.Format("[{0}:{1}]: [Redirected] RegCreateKey {2} {3} return code: {4}",
+                            string.Format("[{0}:{1}] [Redirected] RegCreateKey {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToCreate, result));
                         if (result != IntPtr.Zero)
                         {
@@ -317,11 +320,11 @@ namespace RegHook
                 }
 
                 this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: Calling from original location...",
+                    string.Format("[{0}:{1}] Calling from original location...",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
                 result = WinAPI.RegCreateKey(hKey, subKey, ref hkResult);
                 this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: [Origin] RegCreateKey {2} {3} return code: {4}",
+                    string.Format("[{0}:{1}] [Origin] RegCreateKey {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
                 return result;
             }
@@ -340,7 +343,7 @@ namespace RegHook
         {
 
             this._messageQueue.Enqueue(
-                string.Format("[{0}:{1}]: Calling RegDeleteKeyEx {2} {3}",
+                string.Format("[{0}:{1}] Calling RegDeleteKeyEx {2} {3}",
                     EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey));
 
             IntPtr result = IntPtr.Zero;
@@ -355,7 +358,7 @@ namespace RegHook
                         keyToDelete = keyToDelete.ToUpper().Replace(map.Source.ToUpper(), vreg_redirected + "\\" + map.Destination);
                         result = WinAPI.RegDeleteKeyEx(vreg_root, keyToDelete, samDesired, Reserved);
                         this._messageQueue.Enqueue(
-                            string.Format("[{0}:{1}]: [Redirected] RegDeleteKeyEx {2} {3} return code: {4}",
+                            string.Format("[{0}:{1}] [Redirected] RegDeleteKeyEx {2} {3} return code: {4}",
                                 EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(vreg_root), keyToDelete, result));
                         if (result != IntPtr.Zero)
                         {
@@ -369,11 +372,11 @@ namespace RegHook
                 }
 
                 this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: Calling from original location...",
+                    string.Format("[{0}:{1}] Calling from original location...",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId()));
                 result = WinAPI.RegDeleteKeyEx(hKey, subKey, samDesired, Reserved);
                 this._messageQueue.Enqueue(
-                    string.Format("[{0}:{1}]: [Origin] RegDeleteKeyEx {2} {3} return code: {4}",
+                    string.Format("[{0}:{1}] [Origin] RegDeleteKeyEx {2} {3} return code: {4}",
                         EasyHook.RemoteHooking.GetCurrentProcessId(), EasyHook.RemoteHooking.GetCurrentThreadId(), HKEY_PtrToStr(hKey), subKey, result));
                 return result;
 

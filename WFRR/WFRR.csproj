@@ -14,6 +14,10 @@
       <HintPath>..\3rdparty\EasyHook.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\3rdparty\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NDesk.Options, Version=0.2.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\3rdparty\NDesk.Options.dll</HintPath>
       <Private>True</Private>

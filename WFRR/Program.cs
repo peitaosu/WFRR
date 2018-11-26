@@ -4,14 +4,21 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Reflection;
 using NDesk.Options;
+using log4net;
+using log4net.Config;
 
 namespace WFRR
 {
-    class Program
+    class WFRR
     {
+        private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         static void Main(string[] args)
         {
+            XmlConfigurator.Configure();
+
             Int32 targetPID = 0;
             string targetExe = null;
             string targetArg = "";
@@ -46,10 +53,11 @@ namespace WFRR
             try
             {
                 parser.Parse(args);
+                _log.Info("[WFRR] Arguments: " + string.Join(" ", args));
             }
             catch (OptionException e)
             {
-                Console.WriteLine("[ERROR]: " + e.Message);
+                _log.Error("[WFRR] " + e.Message);
                 Console.WriteLine();
                 isShowHelp = true;
             }
@@ -85,8 +93,7 @@ namespace WFRR
                 {
                     if (targetPID > 0)
                     {
-                        Console.WriteLine("[WFRR]: Attempting to inject into process {0}", targetPID);
-
+                        _log.Info("[WFRR] Attempting to inject into process: " + targetPID);
                         EasyHook.RemoteHooking.Inject(
                             targetPID,
                             injectionRegLibrary,
@@ -96,8 +103,7 @@ namespace WFRR
                     }
                     else if (!string.IsNullOrEmpty(targetExe))
                     {
-                        Console.WriteLine("[WFRR]: Attempting to create and inject into {0}", targetExe);
-
+                        _log.Info("[WFRR] Attempting to create and inject into: " + targetExe);
                         EasyHook.RemoteHooking.CreateAndInject(
                             targetExe,
                             targetArg,
@@ -115,8 +121,7 @@ namespace WFRR
                 {
                     if (targetPID > 0)
                     {
-                        Console.WriteLine("[WFRR]: Attempting to inject into process {0}", targetPID);
-
+                        _log.Info("[WFRR] Attempting to inject into process: " + targetPID);
                         EasyHook.RemoteHooking.Inject(
                             targetPID,
                             injectionFSLibrary,
@@ -126,8 +131,7 @@ namespace WFRR
                     }
                     else if (!string.IsNullOrEmpty(targetExe))
                     {
-                        Console.WriteLine("[WFRR]: Attempting to create and inject into {0}", targetExe);
-
+                        _log.Info("[WFRR] Attempting to create and inject into: " + targetExe);
                         EasyHook.RemoteHooking.CreateAndInject(
                             targetExe,
                             targetArg,
@@ -143,10 +147,7 @@ namespace WFRR
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[WFRR]: There was an error while injecting into target:");
-                Console.ResetColor();
-                Console.WriteLine(e.ToString());
+                _log.Error("[WFRR] There was an error while injecting into target: " + e.ToString());
             }
 
             while (ProcessAlive(targetPID))
@@ -161,7 +162,7 @@ namespace WFRR
 
         static int FindProcessIdByName(string name)
         {
-            Console.WriteLine("[WFRR]: Looking for process: " + name);
+            _log.Info("[WFRR] Looking for process: " + name);
             while (true)
             {
                 Process[] processlist = Process.GetProcesses();
