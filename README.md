@@ -1,7 +1,7 @@
 # Windows File/Registry Redirection
 [![GitHub license](https://img.shields.io/github/license/peitaosu/Win-FS-Reg-Redirect.svg)](https://github.com/peitaosu/Win-FS-Reg-Redirect/blob/master/LICENSE)
 
-This project is supposed to redirect all file/registry calls of process to virtual file system/registry.
+This project is supposed to redirect all file/registry calls of process to seperated file system/registry location.
 
 ![Snagit Works with WFRR](Sample/snagit/snagit.png)
 
@@ -18,6 +18,7 @@ This project is supposed to redirect all file/registry calls of process to virtu
 
 ## Supported APIs
 * RegOpenKey(Ex)
+* RegCreateKey(Ex)
 * RegDeleteKey(Ex)
 * CreateFileW
 * DeleteFileW
