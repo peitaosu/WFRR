@@ -17,7 +17,7 @@ namespace FSHook
             _log.Info("[WFRR:FSHook] FSHook has been injected into process: " + clientPID);
         }
 
-        public void ReportMessages(int clientPID, string[] messages)
+        public void ReportMessages(string[] messages)
         {
             for (int i = 0; i < messages.Length; i++)
             {
@@ -25,9 +25,16 @@ namespace FSHook
             }
         }
 
-        public void ReportMessage(int clientPID, string message)
+        public void ReportMessage(string message)
         {
             _log.Info("[WFRR:FSHook] " + message);
+        }
+
+        public void ReportDebug(string message)
+        {
+#if DEBUG
+            _log.Debug("[WFRR:FSHook] " + message);
+#endif
         }
 
         public void ReportException(Exception e)
@@ -67,6 +74,8 @@ namespace FSHook
             try
             {
                 vfs_json = new StreamReader(vfs_path).ReadToEnd();
+                _server.ReportMessage("Getting configuration from: " + vfs_path);
+                _server.ReportDebug("V_FS.json: \n" + vfs_json);
                 _vfs = JsonConvert.DeserializeObject<VFS>(vfs_json);
             }
             catch (Exception e)
@@ -79,21 +88,21 @@ namespace FSHook
                 new WinAPI.CreateFileW_Delegate(CreateFile_Hook),
                 this);
             fsCreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CreateFileW hook installed");
+            _server.ReportMessage("CreateFileW hook installed");
 
             var fsDeleteFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "DeleteFileW"),
                 new WinAPI.DeleteFileW_Delegate(DeleteFile_Hook),
                 this);
             fsDeleteFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "DeleteFileW hook installed");
+            _server.ReportMessage("DeleteFileW hook installed");
 
             var fsCopyFileHook = EasyHook.LocalHook.Create(
                 EasyHook.LocalHook.GetProcAddress("kernel32.dll", "CopyFileW"),
                 new WinAPI.CopyFileW_Delegate(CopyFile_Hook),
                 this);
             fsCopyFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
-            _server.ReportMessage(EasyHook.RemoteHooking.GetCurrentProcessId(), "CopyFileW hook installed");
+            _server.ReportMessage("CopyFileW hook installed");
 
             EasyHook.RemoteHooking.WakeUpProcess();
 
@@ -113,7 +122,7 @@ namespace FSHook
 
                     if (queued != null && queued.Length > 0)
                     {
-                        _server.ReportMessages(EasyHook.RemoteHooking.GetCurrentProcessId(), queued);
+                        _server.ReportMessages(queued);
                     }
                     else
                     {
