@@ -50,6 +50,8 @@ namespace WFRR
                    v => isShowHelp = v != null },
             };
 
+            GetDebugInfo();
+
             try
             {
                 parser.Parse(args);
@@ -79,7 +81,7 @@ namespace WFRR
 
             if (targetPID <= 0 && string.IsNullOrEmpty(targetExe))
                 return;
-
+            
             EasyHook.RemoteHooking.IpcCreateServer<RegHook.ServerInterface>(ref regChannelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
 
             EasyHook.RemoteHooking.IpcCreateServer<FSHook.ServerInterface>(ref fsChannelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
@@ -179,6 +181,19 @@ namespace WFRR
         static bool ProcessAlive(int pid)
         {
             return Process.GetProcesses().Any(x => x.Id == pid);
+        }
+
+        static void GetDebugInfo()
+        {
+            _log.Debug("[WFRR] OS Version: " + System.Environment.OSVersion);
+            _log.Debug("[WFRR] OS 64bit: " + System.Environment.Is64BitOperatingSystem);
+            _log.Debug("[WFRR] WFRR Version: " + Assembly.GetExecutingAssembly().GetName().Version);
+            _log.Debug("[WFRR] WFRR 64bit: " + System.Environment.Is64BitProcess);
+#if DEBUG
+            _log.Debug("[WFRR] WFRR Release: False");
+#else
+            _log.Debug("[WFRR] WFRR Release: True");
+#endif
         }
 
         [DllImport("kernel32.dll")]
