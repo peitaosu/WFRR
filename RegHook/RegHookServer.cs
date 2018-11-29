@@ -76,12 +76,16 @@ namespace RegHook
 
             try
             {
+                //load V_REG.json from same location of RegHook.dll
                 vreg_json = new StreamReader(vreg_path).ReadToEnd();
                 _server.ReportMessage("Getting configuration from: " + vreg_path);
                 _server.ReportDebug("V_REG.json: \n" + vreg_json);
+                //convert to VRegKey object
                 _vreg = JsonConvert.DeserializeObject<VRegKey>(vreg_json);
+                //get vreg_root for redirected registry
                 vreg_root_str = _vreg.VRegRedirected.Split('\\')[0];
                 vreg_root = HKEY_StrToPtr(vreg_root_str);
+                //get subkey of redirected location
                 vreg_redirected = _vreg.VRegRedirected.Substring(vreg_root_str.Length + 1);
                 _server.ReportMessage("VRegRedirected: " + vreg_redirected);
             }

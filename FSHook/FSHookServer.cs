@@ -73,9 +73,11 @@ namespace FSHook
 
             try
             {
+                //load V_FS.json from same location of FSHook.dll
                 vfs_json = new StreamReader(vfs_path).ReadToEnd();
                 _server.ReportMessage("Getting configuration from: " + vfs_path);
                 _server.ReportDebug("V_FS.json: \n" + vfs_json);
+                //convert to VFS object
                 _vfs = JsonConvert.DeserializeObject<VFS>(vfs_json);
             }
             catch (Exception e)

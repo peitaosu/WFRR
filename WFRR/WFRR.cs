@@ -13,22 +13,35 @@ namespace WFRR
 {
     class WFRR
     {
+        //get logger
         private static readonly ILog _log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         static void Main(string[] args)
         {
+            //configure logger
             XmlConfigurator.Configure();
 
+            //initial variables
             Int32 targetPID = 0;
             string targetExe = null;
             string targetArg = "";
             string inject = "all";
-
             string regChannelName = null;
             string fsChannelName = null;
-
             bool isShowHelp = false;
             bool isBackground = false;
+
+            /*
+             * -e, --exe=VALUE            the executable file to launch and inject.
+             * -a, --arg=VALUE            the arguments of executable file to launch and inject.
+             * -n, --pname=VALUE          the name of process want to inject.
+             * -i, --pid=VALUE            the id of process want to inject.
+             *     --all                  inject file hook and registry hook.
+             *     --file                 inject file hook only.
+             *     --reg                  inject registry hook only.
+             * -b, --bg                   runs in background.
+             * -h, --help                 show help messages.
+             */
             var parser = new OptionSet() {
                 { "e|exe=", "the executable file to launch and inject.",
                    v => { if (v != null) targetExe = v; } },
@@ -50,15 +63,18 @@ namespace WFRR
                    v => isShowHelp = v != null },
             };
 
+            //get OS and process info
             GetInfo();
 
             try
             {
+                //parse arguments
                 parser.Parse(args);
                 _log.Info("[WFRR] Arguments: " + string.Join(" ", args));
             }
             catch (OptionException e)
             {
+                //parse failed, show the error and will help info
                 _log.Error("[WFRR] " + e.Message);
                 Console.WriteLine();
                 isShowHelp = true;
@@ -66,12 +82,15 @@ namespace WFRR
 
             if (isBackground)
             {
+                //runs in background
                 var hWnd = GetConsoleWindow();
                 ShowWindow(hWnd, 0);
             }
 
             if (isShowHelp || (targetPID <= 0 && targetExe == null))
             {
+                //--bg set or arguments not meet requirements
+                //print help info
                 Console.WriteLine("Usage: WFRR.exe [OPTIONS]");
                 Console.WriteLine();
                 Console.WriteLine("Options:");
@@ -80,10 +99,13 @@ namespace WFRR
             }
 
             if (targetPID <= 0 && string.IsNullOrEmpty(targetExe))
+                //PID or executable file not meet requirements
                 return;
             
             if (targetPID <= 0)
             {
+                //if process arch not match with target executable file arch
+                //show error and exit
                 string processArch = "32bit";
                 if (System.Environment.Is64BitProcess)
                     processArch = "64bit";
@@ -97,19 +119,22 @@ namespace WFRR
                 }
             }
 
+            //get channels
             EasyHook.RemoteHooking.IpcCreateServer<RegHook.ServerInterface>(ref regChannelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
-
             EasyHook.RemoteHooking.IpcCreateServer<FSHook.ServerInterface>(ref fsChannelName, System.Runtime.Remoting.WellKnownObjectMode.Singleton);
 
+            //get RegHook.dll and FSHook.dll from same location with WFRR.exe
             string injectionRegLibrary = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "RegHook.dll");
             string injectionFSLibrary = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "FSHook.dll");
 
             try
             {
+                //inject RegHook
                 if (inject == "all" || inject == "reg")
                 {
                     if (targetPID > 0)
                     {
+                        //inject to existing process
                         _log.Info("[WFRR] Attempting to inject into process: " + targetPID);
                         EasyHook.RemoteHooking.Inject(
                             targetPID,
@@ -120,6 +145,7 @@ namespace WFRR
                     }
                     else if (!string.IsNullOrEmpty(targetExe))
                     {
+                        //create and inject to process
                         _log.Info("[WFRR] Attempting to create and inject into: " + targetExe);
                         EasyHook.RemoteHooking.CreateAndInject(
                             targetExe,
@@ -134,10 +160,12 @@ namespace WFRR
                     }
                 }
 
+                //inject FSHook
                 if (inject == "all" || inject == "file")
                 {
                     if (targetPID > 0)
                     {
+                        //inject to existing process
                         _log.Info("[WFRR] Attempting to inject into process: " + targetPID);
                         EasyHook.RemoteHooking.Inject(
                             targetPID,
@@ -148,6 +176,7 @@ namespace WFRR
                     }
                     else if (!string.IsNullOrEmpty(targetExe))
                     {
+                        //create and inject to process
                         _log.Info("[WFRR] Attempting to create and inject into: " + targetExe);
                         EasyHook.RemoteHooking.CreateAndInject(
                             targetExe,
@@ -167,6 +196,8 @@ namespace WFRR
                 _log.Error("[WFRR] There was an error while injecting into target: " + e.ToString());
             }
 
+            //every 10 seconds check if process alive
+            //if no, auto exit in 5 seconds
             while (ProcessAlive(targetPID))
             {
                 Thread.Sleep(10000);
@@ -177,6 +208,7 @@ namespace WFRR
             Thread.Sleep(5000);
         }
 
+        //find PID by process name
         static int FindProcessIdByName(string name)
         {
             _log.Info("[WFRR] Looking for process: " + name);
@@ -193,11 +225,13 @@ namespace WFRR
             }
         }
 
+        //check if process alive
         static bool ProcessAlive(int pid)
         {
             return Process.GetProcesses().Any(x => x.Id == pid);
         }
 
+        //get OS and process info
         static void GetInfo()
         {
             _log.Info("[WFRR] OS Version: " + System.Environment.OSVersion);
