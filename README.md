@@ -10,8 +10,9 @@ This project is supposed to redirect all file/registry calls of process to seper
    * EasyHook 
    * Newtonsoft.Json
    * NDesk.Options
+   * log4net
    ```
-   nuget restore WFRR.sln
+   nuget install .\BuildCfg\Packages.config -OutputDirectory packages
    ```
 - Reg2JSON.py
    * python 2.x
@@ -108,6 +109,10 @@ Options:
                         V_REG.json to input
   --32bit               is your application 32bit?
 ```
+
+## Logs
+
+Log file `WFRR.log` will be generated in same location of WFRR.exe and will be useful if you encounter issues.
 
 ## How To Debug
 
