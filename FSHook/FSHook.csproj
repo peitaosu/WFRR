@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FSHook.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\3rdparty\EasyHook32.dll">

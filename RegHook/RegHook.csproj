@@ -41,7 +41,6 @@
     <Compile Include="WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="RegHook.snk" />
   </ItemGroup>
   <ItemGroup>
