@@ -9,7 +9,6 @@ This project is supposed to redirect all file/registry calls of process to seper
 - WFRR.exe
    * EasyHook 
    * Newtonsoft.Json
-   * NDesk.Options
    * log4net
    ```
    nuget install .\BuildCfg\Packages.config -OutputDirectory packages
