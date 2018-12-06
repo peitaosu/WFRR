@@ -8,10 +8,6 @@
     <RootNamespace>FSHook</RootNamespace>
     <AssemblyName>FSHook</AssemblyName>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>FSHook.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EasyHook">
       <HintPath>..\3rdparty\EasyHook.dll</HintPath>
