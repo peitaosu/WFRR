@@ -40,11 +40,9 @@ namespace WFRRTest
                         case "reg":
                             reg(command);
                             break;
-                        /*
                         case "test":
                             test(command);
                             break;
-                        */
                         case "bg":
                             is_bg = true;
                             break;
@@ -66,7 +64,7 @@ namespace WFRRTest
         {
             Console.WriteLine(@"file|exec\read\new\delete\write\load|path");
             Console.WriteLine(@"reg|get\set\new\delete|root|key|value|data");
-            //Console.WriteLine(@"test");
+            Console.WriteLine(@"test");
             Console.WriteLine(@"bg");
             Console.WriteLine(@"info");
             Console.WriteLine(@"exit");
