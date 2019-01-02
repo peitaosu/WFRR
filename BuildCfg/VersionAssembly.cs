@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Windows File System & Registry Redirector")]
-[assembly: AssemblyCopyright("Copyright © Tony Su 2018")]
+[assembly: AssemblyCopyright("Copyright © Tony Su 2018-2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: AssemblyVersion("1.0.0.0")]
