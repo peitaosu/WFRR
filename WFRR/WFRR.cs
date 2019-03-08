@@ -8,6 +8,7 @@ using System.Reflection;
 using Mono.Options;
 using log4net;
 using log4net.Config;
+using log4net.Repository.Hierarchy;
 
 namespace WFRR
 {
@@ -30,6 +31,8 @@ namespace WFRR
             string fsChannelName = null;
             bool isShowHelp = false;
             bool isBackground = false;
+            bool isConsoleLogDisabled = false;
+            bool isFileLogDisabled = false;
 
             /*
              * -e, --exe=VALUE            the executable file to launch and inject.
@@ -40,6 +43,8 @@ namespace WFRR
              *     --file                 inject file hook only.
              *     --reg                  inject registry hook only.
              * -b, --bg                   runs in background.
+             *     --no-console-log       disable console logging.
+             *     --no-file-log          disable file logging.
              * -h, --help                 show help messages.
              */
             var parser = new OptionSet() {
@@ -59,18 +64,19 @@ namespace WFRR
                    v => { if (v != null) inject="reg"; } },
                 { "b|bg", "runs in background.",
                    v => isBackground = v != null },
+                {"no-console-log", "disable console logging.",
+                   v => isConsoleLogDisabled = v != null },
+                {"no-file-log", "disable file logging.",
+                   v => isFileLogDisabled = v != null },
                 { "h|help", "show help messages.",
                    v => isShowHelp = v != null },
             };
 
-            //get OS and process info
-            GetInfo();
 
             try
             {
                 //parse arguments
                 parser.Parse(args);
-                _log.Info("[WFRR] Arguments: " + string.Join(" ", args));
             }
             catch (OptionException e)
             {
@@ -79,6 +85,26 @@ namespace WFRR
                 Console.WriteLine();
                 isShowHelp = true;
             }
+
+            //disable console logging
+            if (isConsoleLogDisabled)
+            {
+                var root = ((Hierarchy)LogManager.GetRepository()).Root;
+                root.RemoveAppender("ColoredConsoleAppender");
+            }
+
+            //disable file logging
+            if (isFileLogDisabled)
+            {
+                var root = ((Hierarchy)LogManager.GetRepository()).Root;
+                root.RemoveAppender("LogFileAppender");
+            }
+
+            //print arguments
+            _log.Info("[WFRR] Arguments: " + string.Join(" ", args));
+
+            //get OS and process info
+            GetInfo();
 
             if (isBackground)
             {
