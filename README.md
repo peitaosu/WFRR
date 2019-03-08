@@ -87,6 +87,8 @@ Options:
       --file                 inject file hook only.
       --reg                  inject registry hook only.
   -b, --bg                   runs in background.
+      --no-console-log       disable console logging.
+      --no-file-log          disable file logging.
   -h, --help                 show help messages.
 ```
 
