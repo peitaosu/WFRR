@@ -1,5 +1,6 @@
 # Windows File/Registry Redirection
 [![GitHub license](https://img.shields.io/github/license/peitaosu/Win-FS-Reg-Redirect.svg)](https://github.com/peitaosu/Win-FS-Reg-Redirect/blob/master/LICENSE)
+![MSVC Version](https://img.shields.io/badge/MSVC-2017-blue.svg)
 
 This project is supposed to redirect all file/registry calls of process to seperated file system/registry location.
 
