@@ -1,6 +1,7 @@
 # Windows File/Registry Redirection
 [![GitHub license](https://img.shields.io/github/license/peitaosu/Win-FS-Reg-Redirect.svg)](https://github.com/peitaosu/Win-FS-Reg-Redirect/blob/master/LICENSE)
 ![MSVC Version](https://img.shields.io/badge/MSVC-2017-blue.svg)
+![Windows](https://img.shields.io/badge/Windows-7%20%7C%2010-blue.svg)
 
 This project is supposed to redirect all file/registry calls of process to seperated file system/registry location.
 
@@ -101,3 +102,7 @@ Log file `WFRR.log` will be generated in same location of WFRR.exe and will be u
 
 Current supported Hooks may be not covered all File System/Registry operations. You probably need to implement additional hooks to cover them.
 To know which API calls haven't be hooked, process monitor is your good friend to monitor program operations.
+
+## Windows 7 Support
+
+The pre-compiled binaries were built and tested on Windows 10. If you want to use this software on Windows 7, it would be better to sync code and build binaries on Windows 7 instead of using pre-compiled binaries. This will avoid some issues.
