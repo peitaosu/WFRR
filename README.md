@@ -12,6 +12,8 @@ This project is supposed to redirect all file/registry calls of process to seper
    * EasyHook 
    * Newtonsoft.Json
    * log4net
+
+   To update dependencies, use nuget to download packages and copy binaries to 3rdparty folder.
    ```
    nuget install .\BuildCfg\Packages.config -OutputDirectory packages
    ```
